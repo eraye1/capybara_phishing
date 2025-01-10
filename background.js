@@ -13,7 +13,7 @@ async function initializeEngine() {
   try {
     console.log('Creating MLCEngine...');
     engine = await CreateMLCEngine(
-      "SmolLM2-360M-Instruct-q4f32_1-MLC",
+      "Llama-3.1-8B-Instruct-q4f32_1-MLC",
       {
         initProgressCallback: (progress) => {
           console.log("Model loading progress:", JSON.stringify(progress));

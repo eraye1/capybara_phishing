@@ -7,6 +7,18 @@ let status = {
   analyzing: 0
 };
 
+// Configuration toggle
+const AI_CONFIG = {
+  provider: 'openai', // 'webllm' or 'openai'
+  openai: {
+    apiKey: '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', // Add your OpenAI API key here
+    model: 'gpt-4o', // Latest GPT-4 model
+    backupModel: 'gpt-4o-mini',
+    maxRetries: 3,
+    timeout: 30000
+  }
+};
+
 // Initialize WebLLM engine
 async function initializeEngine() {
   console.log('Initializing WebLLM engine');
@@ -185,11 +197,10 @@ observer.observe(document.body, {
 
 // Analyze email content using WebLLM
 async function analyzeEmail(emailData) {
-  if (!engine) {
+  if (!status.isLoaded) {
     await initializeEngine();
   }
   
-  // Simplified prompt with explicit number formatting guidance
   const prompt = `Analyze this email for phishing attempts. Consider urgency, suspicious links, credential requests, sender legitimacy, grammar issues, and attachment safety.
   
   Email Subject: ${emailData.subject}
@@ -209,24 +220,30 @@ async function analyzeEmail(emailData) {
   }`;
   
   try {
-    console.log('Starting chat completion...', prompt);
-    const response = await Promise.race([
-      engine.chat.completions.create({
-        messages: [
-          { 
-            role: "system", 
-            content: "You are a cybersecurity expert. Always format numbers with maximum 2 decimal places." 
-          },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.1,
-        max_tokens: 500,
-        response_format: { type: "json_object" }
-      }),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Chat completion timed out after 30s')), 30000)
-      )
-    ]);
+    console.log('Starting analysis with provider:', AI_CONFIG.provider);
+    
+    let response;
+    if (AI_CONFIG.provider === 'webllm') {
+      response = await Promise.race([
+        engine.chat.completions.create({
+          messages: [
+            { 
+              role: "system", 
+              content: "You are a cybersecurity expert. Always format numbers with maximum 2 decimal places." 
+            },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.1,
+          max_tokens: 500,
+          response_format: { type: "json_object" }
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Chat completion timed out after 30s')), 30000)
+        )
+      ]);
+    } else if (AI_CONFIG.provider === 'openai') {
+      response = await analyzeEmailWithOpenAI(prompt);
+    }
     
     console.log('Response received:', response);
     let parsedResponse;
@@ -260,6 +277,90 @@ async function analyzeEmail(emailData) {
       reasons: [`Analysis error: ${error.message.substring(0, 100)}`],
       riskLevel: "unknown"
     };
+  }
+}
+
+async function analyzeEmailWithOpenAI(prompt) {
+  const openaiConfig = AI_CONFIG.openai;
+  
+  try {
+    const response = await Promise.race([
+      fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiConfig.apiKey}`,
+          'OpenAI-Beta': 'assistants=v1'  // Enable latest features
+        },
+        body: JSON.stringify({
+          model: openaiConfig.model,
+          messages: [
+            {
+              role: "system",
+              content: "You are a cybersecurity expert. Always format numbers with maximum 2 decimal places."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.1,
+          max_tokens: 500,
+          response_format: { "type": "json_object" },
+          seed: 123, // For consistent outputs
+          top_p: 0.95,
+          frequency_penalty: 0,
+          presence_penalty: 0
+        })
+      }).then(res => {
+        if (!res.ok) {
+          return res.json().then(err => {
+            throw new Error(`OpenAI API Error: ${err.error?.message || 'Unknown error'}`);
+          });
+        }
+        return res.json();
+      }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('OpenAI request timed out')), openaiConfig.timeout)
+      )
+    ]);
+
+    return response;
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+    
+    // If it's a rate limit error or model overload, try backup model
+    if (error.message.includes('rate_limit') || error.message.includes('overloaded')) {
+      console.log('Attempting with backup model...');
+      const backupResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiConfig.apiKey}`,
+          'OpenAI-Beta': 'assistants=v1'
+        },
+        body: JSON.stringify({
+          model: openaiConfig.backupModel,
+          messages: [
+            {
+              role: "system",
+              content: "You are a cybersecurity expert. Always format numbers with maximum 2 decimal places."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.1,
+          max_tokens: 500,
+          response_format: { "type": "json_object" }
+        })
+      }).then(res => res.json());
+      
+      return backupResponse;
+    }
+    
+    throw error;
   }
 }
 
