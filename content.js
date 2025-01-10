@@ -21,24 +21,31 @@ const AI_CONFIG = {
 
 // Initialize WebLLM engine
 async function initializeEngine() {
-  console.log('Initializing WebLLM engine');
-  try {
-    console.log('About to create MLCEngine');
-    engine = await CreateMLCEngine(
-      "TinyLlama-1.1B-Chat-v0.6",
-      {
-        initProgressCallback: (progress) => {
-          console.log("Model loading progress:", JSON.stringify(progress));
+    console.log('Initializing WebLLM engine');
+    if (AI_CONFIG.provider === 'webllm') {
+        try {
+            console.log('About to create MLCEngine');
+            engine = await CreateMLCEngine(
+            "Llama-3.1-8B-Instruct-q4f32_1-MLC",
+            {
+                initProgressCallback: (progress) => {
+                console.log("Model loading progress:", JSON.stringify(progress));
+                }
+            }
+            );
+            console.log('MLCEngine created successfully');
+            status.isLoaded = true;
+            status.lastUpdated = Date.now();
+        } catch (error) {
+            console.error("Failed to initialize WebLLM:", error.message, error.stack);
+            status.isLoaded = false;
         }
-      }
-    );
-    console.log('MLCEngine created successfully');
-    status.isLoaded = true;
-    status.lastUpdated = Date.now();
-  } catch (error) {
-    console.error("Failed to initialize WebLLM:", error.message, error.stack);
-    status.isLoaded = false;
-  }
+    } else if (AI_CONFIG.provider === 'openai') {
+        console.log('OpenAI provider selected'); 
+        status.isLoaded = true;
+        status.lastUpdated = Date.now();
+        return;
+    }
 }
 
 // Email provider specific selectors
@@ -139,30 +146,92 @@ function extractEmailContent(provider) {
 // Create and insert UI elements
 function createAnalysisUI(results, provider) {
   console.log('Creating UI with results:', results);
-  const banner = document.createElement('div');
-  banner.className = `phishing-detector-banner risk-${results.riskLevel}`;
+  const container = document.querySelector(PROVIDERS[provider].container);
   
+  // Remove existing banner if present
+  const existingBanner = container?.querySelector('.phishing-detector-banner');
+  if (existingBanner) {
+    existingBanner.remove();
+  }
+  
+  const banner = document.createElement('div');
+  banner.className = 'phishing-detector-banner loading';
+  
+  // Show loading state first
   banner.innerHTML = `
-    <div class="banner-content">
-      <span class="risk-level">${results.riskLevel.toUpperCase()} RISK</span>
-      <span class="confidence">Confidence: ${Math.round(results.confidenceScore * 100)}%</span>
-      <button class="details-toggle">Show Details</button>
-    </div>
-    <div class="details hidden">
-      <ul>
-        ${results.reasons.map(reason => `<li>${reason}</li>`).join('')}
-      </ul>
+    <div class="loading-indicator">
+      <div class="loading-spinner"></div>
+      <span>Analyzing email for security threats...</span>
     </div>
   `;
-
-  const container = document.querySelector(PROVIDERS[provider].container);
-  console.log('Found container for banner:', !!container);
+  
   container?.insertBefore(banner, container.firstChild);
-
-  // Add event listeners
-  banner.querySelector('.details-toggle').addEventListener('click', () => {
-    banner.querySelector('.details').classList.toggle('hidden');
-  });
+  
+  // Simulate analysis time (remove in production)
+  setTimeout(() => {
+    banner.className = `phishing-detector-banner risk-${results.riskLevel}`;
+    banner.innerHTML = `
+      <div class="banner-content">
+        <span class="risk-badge">${results.riskLevel.toUpperCase()} RISK</span>
+        <span class="confidence-score">
+          Confidence: ${(results.confidenceScore * 100).toFixed(1)}% 
+          ${results.finalAssessment.falsePositiveRisk < 0.2 ? '✓' : ''}
+        </span>
+        <button class="details-toggle">View Analysis</button>
+      </div>
+      <div class="details hidden">
+        <div class="context-analysis">
+          <h4>Context Analysis</h4>
+          <p>${results.contextAnalysis.businessContext}</p>
+          ${results.legitimatePatterns.matches.length > 0 ? `
+            <div class="legitimate-patterns">
+              <h5>Legitimate Patterns Detected:</h5>
+              <ul>
+                ${results.legitimatePatterns.matches.map(pattern => `<li>${pattern}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        </div>
+        
+        <div class="risk-analysis">
+          <h4>Risk Factors</h4>
+          <ul>
+            ${results.riskFactors.map(factor => `
+              <li class="risk-factor ${factor.severity > 0.7 ? 'high' : factor.severity > 0.4 ? 'medium' : 'low'}">
+                <strong>${factor.category}:</strong> ${factor.detail}
+                ${factor.falsePositiveRisk > 0.5 ? '<span class="false-positive-warning">⚠️ Possible false positive</span>' : ''}
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+        
+        ${results.attachmentRisk ? `
+          <div class="attachment-risk">
+            <div class="attachment-risk-title">Attachment Analysis</div>
+            <div>
+              <p>${results.attachmentRisk.details}</p>
+              ${results.attachmentRisk.legitimateUseCase ? `
+                <p class="legitimate-use">Legitimate use case: ${results.attachmentRisk.legitimateUseCase}</p>
+              ` : ''}
+            </div>
+          </div>
+        ` : ''}
+        
+        <div class="final-assessment">
+          <h4>Final Assessment</h4>
+          <p>${results.finalAssessment.summary}</p>
+        </div>
+      </div>
+    `;
+  
+    // Add event listeners
+    banner.querySelector('.details-toggle').addEventListener('click', (e) => {
+      const details = banner.querySelector('.details');
+      const button = e.target;
+      details.classList.toggle('hidden');
+      button.textContent = details.classList.contains('hidden') ? 'View Analysis' : 'Hide Analysis';
+    });
+  }, 1500); // Show loading for 1.5s
 }
 
 // Main observer to detect when emails are opened
@@ -201,23 +270,87 @@ async function analyzeEmail(emailData) {
     await initializeEngine();
   }
   
-  const prompt = `Analyze this email for phishing attempts. Consider urgency, suspicious links, credential requests, sender legitimacy, grammar issues, and attachment safety.
+  const prompt = `You are an expert email security system. Analyze this email carefully, considering both phishing indicators AND legitimate business patterns.
+  
+  CONTEXT ANALYSIS:
+  1. Business Communication Patterns:
+  - Expected business hours communication
+  - Standard corporate email formats
+  - Normal business workflows
+  - Typical meeting requests/calendar invites
+  - Regular business document sharing
+  - Internal company communications
+  
+  2. Legitimate Scenarios:
+  - Password reset AFTER user request
+  - IT system maintenance notices
+  - HR/Benefits enrollment periods
+  - Regular invoice/billing cycles
+  - Standard meeting scheduling
+  - Document collaboration requests
+  
+  3. Risk Indicators (weighted by context):
+  - Sender legitimacy and history
+  - Communication tone and urgency
+  - Credential/information requests
+  - Link/attachment patterns
+  - Language and formatting
+  - Business context alignment
   
   Email Subject: ${emailData.subject}
   Email Body: ${emailData.body}
   Attachments: ${emailData.attachments.map(a => `${a.name} (${a.type})`).join(', ') || 'None'}
   
-  Provide a JSON response with the following structure, using numbers between 0 and 1 with max 2 decimal places:
+  First, determine if this matches known legitimate patterns:
+  1. Is this a standard business communication?
+  2. Does it follow expected workflows?
+  3. Is the timing and context appropriate?
+  4. Are any requests reasonable for the context?
+  
+  Then analyze for risk factors, considering the legitimate context.
+  
+  Provide a JSON response with the following structure:
   {
     "isPhishing": boolean,
     "confidenceScore": number (0.00 to 1.00),
-    "reasons": string[],
     "riskLevel": "low" | "medium" | "high",
+    "legitimatePatterns": {
+      "matches": string[],
+      "confidence": number (0.00 to 1.00)
+    },
+    "riskFactors": [
+      {
+        "category": string,
+        "detail": string,
+        "severity": number (0.00 to 1.00),
+        "falsePositiveRisk": number (0.00 to 1.00)
+      }
+    ],
+    "contextAnalysis": {
+      "businessContext": string,
+      "workflowValidity": boolean,
+      "timingAppropriate": boolean
+    },
     "attachmentRisk": {
       "level": "low" | "medium" | "high",
-      "details": string
+      "details": string,
+      "legitimateUseCase": string | null
+    },
+    "finalAssessment": {
+      "summary": string,
+      "confidenceInAssessment": number (0.00 to 1.00),
+      "falsePositiveRisk": number (0.00 to 1.00)
     }
-  }`;
+  }
+  
+  IMPORTANT:
+  - Consider business context heavily
+  - Look for legitimate patterns first
+  - Weight false positive risks
+  - Account for normal business operations
+  - Consider industry-standard practices
+  - Evaluate timing and workflow context
+  - Assess reasonableness of requests`;
   
   try {
     console.log('Starting analysis with provider:', AI_CONFIG.provider);
@@ -229,12 +362,12 @@ async function analyzeEmail(emailData) {
           messages: [
             { 
               role: "system", 
-              content: "You are a cybersecurity expert. Always format numbers with maximum 2 decimal places." 
+              content: "You are an enterprise email security system with deep understanding of business communication patterns. Focus on reducing false positives while maintaining security. Format all numbers with maximum 2 decimal places." 
             },
             { role: "user", content: prompt }
           ],
           temperature: 0.1,
-          max_tokens: 500,
+          max_tokens: 800,  // Increased for more detailed analysis
           response_format: { type: "json_object" }
         }),
         new Promise((_, reject) => 
