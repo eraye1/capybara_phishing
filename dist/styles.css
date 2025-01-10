@@ -235,4 +235,34 @@
 .attachment-risk-title {
   font-weight: 600;
   margin-bottom: 4px;
+}
+
+/* Error state */
+.error-message {
+  padding: 16px;
+  background: #fff5f5;
+  border: 1px solid #ffa8a8;
+  border-radius: 6px;
+  margin: 12px 0;
+}
+
+.error-message h4 {
+  color: #e03131;
+  margin-bottom: 8px;
+}
+
+.error-message p {
+  color: #495057;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.phishing-detector-banner.risk-unknown {
+  background: #f8f9fa;
+  border: 1px solid #adb5bd;
+}
+
+.risk-unknown .risk-badge {
+  background: #adb5bd;
+  color: white;
 } 

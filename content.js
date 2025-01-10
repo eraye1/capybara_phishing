@@ -175,11 +175,17 @@ function createAnalysisUI(results, provider) {
         <span class="risk-badge">${results.riskLevel.toUpperCase()} RISK</span>
         <span class="confidence-score">
           Confidence: ${(results.confidenceScore * 100).toFixed(1)}% 
-          ${results.finalAssessment.falsePositiveRisk < 0.2 ? '✓' : ''}
+          ${results.finalAssessment?.falsePositiveRisk < 0.2 ? '✓' : ''}
         </span>
         <button class="details-toggle">View Analysis</button>
       </div>
       <div class="details hidden">
+        ${results.riskLevel === 'unknown' ? `
+          <div class="error-message">
+            <h4>Analysis Error</h4>
+            <p>We encountered an error while analyzing this email. Please try again later.</p>
+          </div>
+        ` : `
         <div class="context-analysis">
           <h4>Context Analysis</h4>
           <p>${results.contextAnalysis.businessContext}</p>
@@ -221,6 +227,7 @@ function createAnalysisUI(results, provider) {
           <h4>Final Assessment</h4>
           <p>${results.finalAssessment.summary}</p>
         </div>
+        `}
       </div>
     `;
   
@@ -367,7 +374,7 @@ async function analyzeEmail(emailData) {
             { role: "user", content: prompt }
           ],
           temperature: 0.1,
-          max_tokens: 800,  // Increased for more detailed analysis
+          max_tokens: 3000,  // Increased for more detailed analysis
           response_format: { type: "json_object" }
         }),
         new Promise((_, reject) => 
@@ -407,8 +414,32 @@ async function analyzeEmail(emailData) {
     return {
       isPhishing: false,
       confidenceScore: 0,
-      reasons: [`Analysis error: ${error.message.substring(0, 100)}`],
-      riskLevel: "unknown"
+      riskLevel: "unknown",
+      legitimatePatterns: {
+        matches: [],
+        confidence: 0
+      },
+      riskFactors: [{
+        category: "Error",
+        detail: `Analysis error: ${error.message.substring(0, 100)}`,
+        severity: 0,
+        falsePositiveRisk: 1
+      }],
+      contextAnalysis: {
+        businessContext: "Unable to analyze context due to error",
+        workflowValidity: false,
+        timingAppropriate: false
+      },
+      attachmentRisk: {
+        level: "unknown",
+        details: "Unable to analyze attachments due to error",
+        legitimateUseCase: null
+      },
+      finalAssessment: {
+        summary: "Analysis failed due to technical error",
+        confidenceInAssessment: 0,
+        falsePositiveRisk: 1
+      }
     };
   }
 }
@@ -438,7 +469,7 @@ async function analyzeEmailWithOpenAI(prompt) {
             }
           ],
           temperature: 0.1,
-          max_tokens: 500,
+          max_tokens: 3000,
           response_format: { "type": "json_object" },
           seed: 123, // For consistent outputs
           top_p: 0.95,
@@ -485,7 +516,7 @@ async function analyzeEmailWithOpenAI(prompt) {
             }
           ],
           temperature: 0.1,
-          max_tokens: 500,
+          max_tokens: 3000,
           response_format: { "type": "json_object" }
         })
       }).then(res => res.json());
