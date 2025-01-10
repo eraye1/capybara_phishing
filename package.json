@@ -1,0 +1,18 @@
+{
+  "name": "capybara",
+  "version": "1.0.0",
+  "description": "Email phishing detection extension",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch"
+  },
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.77"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.260",
+    "copy-webpack-plugin": "^12.0.2",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4"
+  }
+}
