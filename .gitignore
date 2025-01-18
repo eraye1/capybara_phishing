@@ -1,6 +1,12 @@
 # Build output
 dist/
 coverage/
+coverage/**/*
+**/lcov-report/
+**/lcov.info
+**/coverage.json
+coverage/lcov-report/index.html
+coverage/lcov.info
 
 # Dependencies
 node_modules/

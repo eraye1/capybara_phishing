@@ -29,8 +29,10 @@ export function createAnalysisUI(results, provider, PROVIDERS) {
     </div>
     <div class="details-panel">
       <div class="details-content">
-        <p class="summary">${results.finalAssessment.summary}</p>
-        ${results.riskFactors.length > 0 ? `
+        ${results.finalAssessment?.summary ? `
+          <p class="summary">${results.finalAssessment.summary}</p>
+        ` : ''}
+        ${results.riskFactors?.length > 0 ? `
           <div class="risk-factors">
             ${results.riskFactors.map(factor => `
               <div class="factor">

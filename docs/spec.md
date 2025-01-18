@@ -27,7 +27,7 @@ A Chrome extension that leverages WebLLM to analyze emails for phishing attempts
   - Grammar and formatting issues
 
 ### User Interface
-- Non-intrusive banner at top of email when viewing
+- Non-intrusive banner at left of email when viewing
 - Clear visual indicators: Green (safe), Yellow (suspicious), Red (likely phishing)
 - Expandable detailed analysis panel
 - One-click reporting option for false positives/negatives
