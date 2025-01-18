@@ -62,3 +62,7 @@ coverage/**/*
 
 # Configuration files with sensitive data
 config.js
+
+# Synthetic data directory
+ml/ml/data/synthetic/
+ml/ml/data/synthetic/**
