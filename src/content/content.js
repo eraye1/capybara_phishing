@@ -15,10 +15,13 @@ const AI_CONFIG = {
   provider: CONFIG.provider || 'openai', // Use config value or default to 'openai'
   openai: {
     apiKey: CONFIG.OPENAI_API_KEY,
-    model: 'gpt-4o',
-    backupModel: 'gpt-4o-mini',
+    model: CONFIG.model || 'gpt-4',
+    backupModel: CONFIG.backupModel || 'gpt-3.5-turbo',
     maxRetries: 3,
     timeout: 60000,
+  },
+  webllm: {
+    model: CONFIG.model || 'SmolLM2-360M-Instruct-q4f16_1-MLC',
   },
 };
 
@@ -26,7 +29,7 @@ const AI_CONFIG = {
 async function initializeEngine() {
   if (AI_CONFIG.provider === 'webllm') {
     try {
-      engine = await CreateMLCEngine('SmolLM2-360M-Instruct-q4f16_1-MLC', {
+      engine = await CreateMLCEngine(AI_CONFIG.webllm.model, {
         initProgressCallback: (_progress) => {
           // Progress callback
         },

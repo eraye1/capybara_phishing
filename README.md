@@ -34,10 +34,27 @@ For OpenAI API Mode (Default):
 
 For Local LLM Mode:
 
-- NVIDIA GPU with 8GB+ VRAM recommended
+- NVIDIA GPU requirements:
+  - Minimum: NVIDIA GPU with 6GB VRAM
+  - Recommended: NVIDIA GPU with 8GB+ VRAM and CUDA support
+  - Best Performance: NVIDIA RTX 3070 or better
 - Chrome with WebGPU enabled
-- More relaxed Content Security Policy (see Configuration section)
-- Significantly more system resources
+- Model compatibility varies by GPU:
+  - Entry GPUs (6GB VRAM): Limited to heavily quantized models
+  - Mid-range GPUs (8GB VRAM): Can run most quantized models
+  - High-end GPUs (12GB+ VRAM): Can run larger, more accurate models
+- Not all models will work on all GPUs due to:
+  - VRAM limitations
+  - Compute capabilities
+  - Quantization requirements
+
+> 🔬 **Coming Soon**: We're training a specialized SOTA model specifically for email security analysis. This model will:
+>
+> - Be optimized for phishing detection using a large corpus of real-world data
+> - Require less VRAM through advanced quantization techniques
+> - Provide better instruction following for security analysis
+> - Offer improved accuracy while maintaining small size
+> - Support more GPUs through various quantization options
 
 ## 🔐 Configuration
 
@@ -54,11 +71,28 @@ For Local LLM Mode:
      // OpenAI API mode:
      OPENAI_API_KEY: 'your-api-key-here',
      provider: 'openai', // This is the default
+     model: 'gpt-4', // Primary model to use
+     backupModel: 'gpt-3.5-turbo', // Fallback model for rate limits/overload
 
      // Or for WebLLM local mode:
-     provider: 'webllm',
+     // provider: 'webllm',
+     // model: 'SmolLM2-360M-Instruct-q4f16_1-MLC', // Local model to use
    };
    ```
+
+   Available configuration options:
+
+   - `provider`: Either 'openai' (default) or 'webllm'
+   - `OPENAI_API_KEY`: Your OpenAI API key (required for OpenAI mode)
+   - `model`: The primary model to use
+     - For OpenAI: 'gpt-4' (default), 'gpt-3.5-turbo', etc.
+     - For WebLLM: Model options depend on your GPU:
+       - 6GB VRAM: 'Llama-2-7b-chat-hf-q4f16_1' (heavily quantized)
+       - 8GB VRAM: 'SmolLM2-360M-Instruct-q4f16_1-MLC' (default)
+       - 12GB+ VRAM: 'Llama-2-13b-chat-hf-q4f32_1' (better accuracy)
+   - `backupModel`: Fallback model for OpenAI mode when rate limited (defaults to 'gpt-3.5-turbo')
+
+> ⚠️ **Local Model Note**: Model compatibility is highly dependent on your GPU's capabilities. Some models may fail to load or run slowly if your GPU doesn't meet the requirements. We recommend starting with the default model and adjusting based on your GPU's performance.
 
 > ⚠️ IMPORTANT NOTE: This extension requires a production build to run (`npm run build`). Development mode is not supported due to Chrome's Content Security Policy restrictions. After any configuration changes, you'll need to rebuild the extension and refresh it in Chrome.
 
@@ -189,9 +223,15 @@ Capybara is designed with privacy and security in mind:
   2. Local LLM Mode (Privacy-Focused):
      - Uses WebLLM to run a smaller model locally on your GPU
      - No data leaves your computer
-     - Significantly reduced accuracy and performance
-     - Higher system requirements
-     - Limited to simpler analysis patterns
+     - Performance and compatibility depends on your GPU:
+       - Higher-end GPUs: Better accuracy, more model options
+       - Mid-range GPUs: Good balance with quantized models
+       - Entry-level GPUs: Limited to smaller, quantized models
+     - Model selection impacts:
+       - Analysis accuracy
+       - Processing speed
+       - Memory usage
+       - GPU compatibility
 
 - No data persistence
   - Analysis results are shown in the UI but not stored
