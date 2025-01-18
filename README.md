@@ -35,6 +35,7 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
    ```
 
 2. Edit `config.js` with your settings:
+
    ```javascript
    export const CONFIG = {
      // For OpenAI API mode (default, recommended):
