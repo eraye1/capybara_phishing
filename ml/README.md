@@ -13,16 +13,23 @@ pip install -r requirements.txt
 
 2. Generate synthetic training data:
 ```bash
-python src/data/generate_synthetic.py
+python3 src/data/synthetic_data.py
 ```
 This will create synthetic data in `data/synthetic/`:
-- train.jsonl (800 samples)
-- val.jsonl (100 samples)
-- test.jsonl (100 samples)
+- train.jsonl (800 samples) - Training dataset with balanced phishing/non-phishing examples
+- val.jsonl (100 samples) - Validation set for monitoring training
+- test.jsonl (100 samples) - Hold-out test set for final evaluation
+
+Each sample contains:
+- URL
+- Email content
+- HTML content (optional)
+- Label (phishing/non-phishing)
+- Metadata (timestamp, source, etc.)
 
 3. Train the model:
 ```bash
-python src/training/train.py
+python3 src/training/train.py
 ```
 
 ## Project Structure
@@ -34,6 +41,8 @@ ml/
 │   └── synthetic/     # Generated synthetic data
 ├── src/               # Source code
 │   ├── data/          # Data processing
+│   │   ├── synthetic_data.py  # Synthetic data generation
+│   │   └── dataset.py         # Dataset loading
 │   ├── models/        # Model definitions
 │   └── training/      # Training scripts
 └── outputs/           # Training outputs
