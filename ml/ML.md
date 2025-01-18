@@ -24,8 +24,8 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Fast inference time (<100ms)
 - Robust against adversarial attacks
 - Excellent instruction following for security analysis tasks
-- Browser-compatible inference (<200MB memory footprint)
-- Real-time analysis capability (<5 seconds end-to-end)
+- Memory-efficient inference (<200MB)
+- Support for quantized deployment
 
 ## 2. Model Architecture
 
@@ -37,30 +37,27 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
   - Strong zero-shot performance
   - Open weights availability
   - Excellent context window (4K tokens)
+  - Small memory footprint
+  - Efficient inference characteristics
 
 ### 2.2 Architecture Modifications
 
 - **LoRA Adaptation Layers**
-
   - Rank: 64
   - Alpha: 32
   - Target modules: q_proj, v_proj
   - Dropout: 0.05
 
 - **Additional Components**
-
   - Custom tokenizer extensions for security terminology
   - Specialized classification head
   - URL encoding layer
-  - WebAssembly-optimized inference path
-  - Browser memory management module
-  - Real-time content extraction pipeline
 
 - **Model Compression Pipeline**
-  - 4-bit quantization for browser deployment
+  - 4-bit quantization
   - Selective layer pruning
   - Knowledge distillation to smaller backbone
-  - Browser-optimized model checkpoint format
+  - Optimized model checkpoint format
 
 ## 3. Training Infrastructure
 
@@ -95,9 +92,6 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 3. Internal security incident reports
 4. Clean email corpus (negative samples)
 5. Synthetic data generation
-6. Gmail/Hotmail specific phishing patterns
-7. Browser-rendered email content samples
-8. HTML/DOM structure variations
 
 ### 4.2 Data Processing Pipeline
 
@@ -130,10 +124,6 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 2. Supervised fine-tuning on phishing data
 3. RLHF (Reinforcement Learning from Human Feedback)
 4. DPO (Direct Preference Optimization)
-5. Browser-specific optimization training
-   - Memory-constrained training
-   - Latency-aware distillation
-   - DOM-specific pattern learning
 
 ### 5.3 Hyperparameters
 
@@ -172,7 +162,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Human evaluation of instruction following
 - Red team assessment
 
-## 7. Production Deployment
+## 7. Model Export and Deployment
 
 ### 7.1 Model Optimization
 
@@ -180,38 +170,54 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Quantization (INT8/INT4)
 - Pruning
 - ONNX export
-- TensorRT optimization
-- WebAssembly compilation pipeline
-- Browser-specific memory optimization
-- Chrome extension packaging
-- Versioned model updates
+- Optimized checkpoint format
 
-### 7.2 Serving Infrastructure
+### 7.2 Model Versioning
 
-- WebLLM integration layer
-- Browser-based inference engine
-- Local storage management
-- Extension update system
-- Chrome Web Store deployment pipeline
-- Cross-origin security handling
+- Semantic versioning for releases
+- Compatibility tracking
+- Performance regression testing
+- Size and memory benchmarking
 
-### 7.3 CI/CD Pipeline
+### 7.3 Deployment Platforms
 
-- Automated testing
-- Model versioning
-- A/B testing framework
-- Gradual rollout strategy
-- Monitoring and alerting
+#### 7.3.1 Hugging Face Hub Deployment
+- Model weights and tokenizer pushed to Hub
+- Model card with:
+  - Performance metrics
+  - Usage examples
+  - Deployment instructions
+  - Hardware requirements
+- Inference API endpoints
+- Spaces demo deployment
+
+#### 7.3.2 MLC Format Deployment
+- TinyLLaMA model compilation to MLC format
+- WebLLM integration setup
+- Quantization profiles:
+  - INT4 for memory efficiency
+  - INT8 for balanced performance
+- Browser-optimized inference
+- WASM/WebGPU acceleration
+
+#### 7.3.3 Deployment Pipeline
+1. Export trained model checkpoints
+2. Convert to Hugging Face format
+3. Optimize and quantize
+4. Generate MLC compilation
+5. Push to Hugging Face Hub
+6. Deploy WebLLM integration
+7. Setup monitoring and logging
 
 ## 8. Monitoring and Maintenance
 
 ### 8.1 Production Metrics
 
 - Model performance metrics
-- System health metrics
+- Inference latency tracking
+- Memory usage monitoring
 - Data drift detection
 - Concept drift detection
-- Resource utilization
 
 ### 8.2 Update Strategy
 
@@ -220,140 +226,10 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Emergency update protocol
 - Version control and rollback
 
-## 9. Security Considerations
-
-### 9.1 Model Security
-
-- Input sanitization
-- Rate limiting
-- Access control
-- Audit logging
-- Privacy-preserving inference
-
-### 9.2 Data Security
-
-- Data encryption
-- Access controls
-- Compliance requirements
-- Data retention policies
-- PII handling
-
-## 10. Timeline and Milestones
-
-### Phase 1: Infrastructure Setup (2 weeks)
-
-- Hardware procurement
-- Software stack setup
-- CI/CD pipeline establishment
-
-### Phase 2: Data Engineering (4 weeks)
-
-- Data collection
-- Processing pipeline setup
-- Quality assurance
-
-### Phase 3: Training (8 weeks)
-
-- Pre-training
-- Fine-tuning
-- Evaluation
-- Optimization
-
-### Phase 4: Deployment (4 weeks)
-
-- Production infrastructure setup
-- Gradual rollout
-- Monitoring implementation
-
-## 11. Success Criteria
-
-### 11.1 Technical Metrics
-
-- 98% accuracy on test set
-- <100ms inference time
-- <0.1% false positive rate
-- 95% instruction following accuracy
-
-### 11.2 Business Metrics
-
-- 90% reduction in successful phishing attacks
-- 80% reduction in manual review time
-- 99.9% system uptime
-- <1% user complaint rate
-
-## 12. Future Improvements
-
-### 12.1 Model Enhancements
-
-- Multi-modal capabilities
-- Cross-lingual support
-- Real-time adaptation
-- Federated learning
-
-### 12.2 System Enhancements
-
-- Auto-ML integration
-- Automated data collection
-- Self-healing capabilities
-- Enhanced explainability
-
-## 13. References
+## 9. References
 
 1. LLaMA 2: Open Foundation and Fine-Tuned Chat Models
 2. QLoRA: Efficient Finetuning of Quantized LLMs
 3. Scaling Laws for Neural Language Models
 4. RLHF: Constitutional AI: A Framework for Machine Learning Systems
 5. Flash Attention: Fast and Memory-Efficient Exact Attention
-
-## 14. Browser Integration Specifications
-
-### 14.1 WebLLM Integration
-
-- Custom WebAssembly build pipeline
-- Memory-mapped model loading
-- Streaming inference optimization
-- Browser worker thread management
-- GPU acceleration when available
-
-### 14.2 Extension Architecture
-
-- Background worker process
-- Content script injection
-- DOM manipulation safety
-- Cross-origin security model
-- Local storage management
-- Update mechanism
-
-### 14.3 Performance Optimization
-
-- Incremental model loading
-- Lazy feature computation
-- Memory usage monitoring
-- Battery impact consideration
-- Network usage optimization
-
-### 14.4 User Privacy
-
-- Local-only inference
-- Data minimization
-- Secure storage practices
-- Transparent processing
-- Optional telemetry
-
-## 15. Deployment Strategy
-
-### 15.1 Chrome Web Store
-
-- Phased rollout plan
-- Version control
-- Update frequency
-- User feedback loop
-- Analytics integration
-
-### 15.2 Enterprise Deployment
-
-- Group policy configuration
-- Network administrator controls
-- Compliance documentation
-- Audit logging capability
-- Custom deployment options
