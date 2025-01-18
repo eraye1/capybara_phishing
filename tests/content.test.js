@@ -1,4 +1,3 @@
-import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { JSDOM } from 'jsdom';
 
 // Mock chrome API
