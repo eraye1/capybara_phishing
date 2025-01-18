@@ -6,6 +6,13 @@
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
+Capybara: Browser-based Phishing Detection
+
+> Just as the Catholic Church once classified capybaras as "fish" for Lent (despite them being decidedly not fish),
+> our Chrome Extension and (soon-to-be-released) AI model helps users identify what is and isn't a phish.
+>
+> The capybara's historical misclassification makes it the perfect mascot for anti-phishing software!
+
 Capybara is a Chrome extension that leverages advanced AI to protect users from phishing attempts and malicious emails in Gmail. By analyzing email content in real-time, it provides instant risk assessments and security recommendations.
 
 ## 🌟 Features
