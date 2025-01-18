@@ -5,6 +5,7 @@
 [![codecov](https://codecov.io/gh/eraye1/capybara_phishing/branch/main/graph/badge.svg)](https://codecov.io/gh/eraye1/capybara_phishing)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Feraye1%2Fcapybara_phishing.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Feraye1%2Fcapybara_phishing?ref=badge_shield)
 
 Capybara: Browser-based Phishing Detection
 
@@ -219,6 +220,9 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Feraye1%2Fcapybara_phishing.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Feraye1%2Fcapybara_phishing?ref=badge_large)
 
 ## 🔒 Privacy & Security
 
