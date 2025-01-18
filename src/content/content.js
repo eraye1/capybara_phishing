@@ -65,13 +65,13 @@ const observer = new MutationObserver(async (mutations) => {
       try {
         const emailData = await extractEmailData();
         const loadingBanner = showLoadingState(provider, PROVIDERS);
-        
+
         // Show loading state while analyzing
         status.analyzing++;
-        
+
         const results = await analyzeEmail(emailData);
         createAnalysisUI(results, provider, PROVIDERS);
-        
+
         status.analyzing--;
         if (loadingBanner) {
           loadingBanner.remove();
