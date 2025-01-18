@@ -17,14 +17,27 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
 - 🎨 Clean, unobtrusive UI integration with Gmail
 - 📱 Responsive design that works across devices
 - 🔐 Secure by design - your API key stays local
-- 💻 Optional local LLM mode using WebLLM (reduced accuracy)
+- 💻 Optional local LLM mode in production builds
 
 ## 📋 Prerequisites
+
+Common Requirements:
 
 - Node.js (v18 or higher)
 - Chrome Browser (v88 or higher)
 - ImageMagick (for icon generation)
-- OpenAI API key for AI analysis
+
+For OpenAI API Mode (Default):
+
+- OpenAI API key
+- Internet connection
+
+For Local LLM Mode:
+
+- NVIDIA GPU with 8GB+ VRAM recommended
+- Chrome with WebGPU enabled
+- More relaxed Content Security Policy (see Configuration section)
+- Significantly more system resources
 
 ## 🔐 Configuration
 
@@ -38,20 +51,22 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
 
    ```javascript
    export const CONFIG = {
-     // For OpenAI API mode (default, recommended):
+     // OpenAI API mode:
      OPENAI_API_KEY: 'your-api-key-here',
+     provider: 'openai', // This is the default
 
-     // To use local LLM mode instead:
-     provider: 'webllm', // Change to 'openai' for API mode
-     // Note: Local mode requires a GPU and has reduced accuracy
+     // Or for WebLLM local mode:
+     provider: 'webllm',
    };
    ```
+
+> ⚠️ IMPORTANT NOTE: This extension requires a production build to run (`npm run build`). Development mode is not supported due to Chrome's Content Security Policy restrictions. After any configuration changes, you'll need to rebuild the extension and refresh it in Chrome.
 
 > ⚠️ SECURITY NOTE: Never commit your `config.js` file or share your API keys. The file is listed in `.gitignore` to prevent accidental commits.
 
 For CI/CD pipelines, set the following secrets in your GitHub repository:
 
-- `OPENAI_API_KEY`: Your OpenAI API key (not needed if using local LLM mode)
+- `OPENAI_API_KEY`: Your OpenAI API key
 - `CODECOV_TOKEN`: Your Codecov token
 
 ## 🚀 Quick Start
@@ -90,11 +105,19 @@ For CI/CD pipelines, set the following secrets in your GitHub repository:
 
 ## 🛠️ Development
 
-Start the development server with hot reload:
+Build and watch for changes:
 
 ```bash
-npm run dev
+npm run build
 ```
+
+In Chrome:
+
+1. Go to `chrome://extensions`
+2. Enable "Developer mode"
+3. Click "Load unpacked" and select the `dist` directory
+4. After making changes, run `npm run build` again
+5. Click the refresh icon in Chrome's extension page
 
 Run tests:
 
@@ -102,11 +125,7 @@ Run tests:
 npm test
 ```
 
-Generate test coverage report:
-
-```bash
-npm run coverage
-```
+> Note: Due to Chrome's Content Security Policy restrictions and WebLLM's requirements, we can only run the extension from production builds. The development server (`npm run dev`) is not supported.
 
 ## 🧪 Testing
 
@@ -121,6 +140,12 @@ Run the full test suite:
 
 ```bash
 npm run test:all
+```
+
+Generate test coverage report:
+
+```bash
+npm run coverage
 ```
 
 ## 🏗️ Architecture

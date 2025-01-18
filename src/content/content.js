@@ -12,7 +12,7 @@ let status = {
 
 // Configuration toggle
 const AI_CONFIG = {
-  provider: 'openai', // 'webllm' or 'openai'
+  provider: CONFIG.provider || 'openai', // Use config value or default to 'openai'
   openai: {
     apiKey: CONFIG.OPENAI_API_KEY,
     model: 'gpt-4o',
