@@ -52,3 +52,13 @@ model_cache/
 *.crx
 *.pem
 *.zip
+
+# Coverage reports
+coverage/
+coverage/**/*
+**/lcov-report/
+**/lcov.info
+**/coverage.json
+
+# Configuration files with sensitive data
+config.js

@@ -26,6 +26,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create config file
+        run: |
+          echo "export const CONFIG = {
+            OPENAI_API_KEY: '${{ secrets.OPENAI_API_KEY }}',
+            MODEL_CONFIG: {
+              temperature: 0.1,
+              maxTokens: 3000,
+              topP: 0.95,
+            },
+            SECURITY: {
+              minConfidenceThreshold: 0.8,
+              maxRetries: 3,
+              timeoutMs: 60000,
+            },
+          };" > config.js
+
       - name: Check code style
         run: npm run prettier:check
 
@@ -57,6 +73,22 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Create config file
+        run: |
+          echo "export const CONFIG = {
+            OPENAI_API_KEY: '${{ secrets.OPENAI_API_KEY }}',
+            MODEL_CONFIG: {
+              temperature: 0.1,
+              maxTokens: 3000,
+              topP: 0.95,
+            },
+            SECURITY: {
+              minConfidenceThreshold: 0.8,
+              maxRetries: 3,
+              timeoutMs: 60000,
+            },
+          };" > config.js
 
       - name: Clean and build extension
         run: |
