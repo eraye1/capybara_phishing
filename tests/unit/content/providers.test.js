@@ -2,7 +2,30 @@ import { detectProvider, extractEmailContent, PROVIDERS } from '../../../src/con
 
 describe('Email Provider Detection', () => {
   beforeEach(() => {
-    // Setup DOM
+    window.location = {
+      hostname: '',
+      href: 'http://example.com'
+    };
+  });
+
+  test('should detect Gmail provider', () => {
+    window.location.hostname = 'mail.google.com';
+    expect(detectProvider()).toBe('GMAIL');
+  });
+
+  test('should detect Hotmail provider', () => {
+    window.location.hostname = 'hotmail.com';
+    expect(detectProvider()).toBe('HOTMAIL');
+  });
+
+  test('should return null for unsupported providers', () => {
+    window.location.hostname = 'unknown.com';
+    expect(detectProvider()).toBeNull();
+  });
+});
+
+describe('Email Content Extraction', () => {
+  beforeEach(() => {
     document.body.innerHTML = `
       <div class="adn ads">
         <div class="hP">Test Subject</div>
@@ -14,14 +37,7 @@ describe('Email Provider Detection', () => {
     `;
   });
 
-  test('should detect Gmail provider', () => {
-    window.location.hostname = 'mail.google.com';
-    expect(detectProvider()).toBe('GMAIL');
-  });
-
-  // ... other provider tests ...
-
-  test('should extract email content correctly', () => {
+  test('should extract Gmail email content correctly', () => {
     const emailContent = extractEmailContent('GMAIL');
     expect(emailContent).toMatchObject({
       subject: 'Test Subject',
@@ -32,5 +48,19 @@ describe('Email Provider Detection', () => {
         size: '1024'
       }]
     });
+  });
+
+  test('should handle missing content gracefully', () => {
+    document.body.innerHTML = '<div class="adn ads"></div>';
+    const emailContent = extractEmailContent('GMAIL');
+    expect(emailContent).toMatchObject({
+      subject: '',
+      body: '',
+      attachments: []
+    });
+  });
+
+  test('should handle invalid provider', () => {
+    expect(() => extractEmailContent('INVALID')).toThrow();
   });
 }); 

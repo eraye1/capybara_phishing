@@ -4,7 +4,7 @@ module.exports = {
       targets: {
         node: 'current'
       },
-      modules: 'commonjs'
+      modules: 'auto'
     }]
   ],
   plugins: [

@@ -16,6 +16,9 @@ node_modules/
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+config.js
 
 # Debug logs
 npm-debug.log*

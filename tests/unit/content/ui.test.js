@@ -10,7 +10,13 @@ describe('UI Generation', () => {
     const results = {
       riskLevel: 'low',
       confidenceScore: 0.95,
-      // ... other result data ...
+      contextAnalysis: { businessContext: 'Normal business email' },
+      legitimatePatterns: { matches: ['Standard format'] },
+      riskFactors: [],
+      finalAssessment: { 
+        summary: 'Safe email',
+        falsePositiveRisk: 0.1
+      }
     };
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
@@ -20,5 +26,36 @@ describe('UI Generation', () => {
     expect(banner.classList.contains('risk-low')).toBe(true);
   });
 
-  // ... other UI tests ...
+  test('should update existing UI when analyzing same email', () => {
+    document.body.innerHTML = `
+      <div class="adn ads">
+        <div class="phishing-detector-banner risk-low"></div>
+      </div>
+    `;
+
+    const results = {
+      riskLevel: 'high',
+      confidenceScore: 0.95,
+      contextAnalysis: { businessContext: 'Suspicious email' },
+      legitimatePatterns: { matches: [] },
+      riskFactors: [{ category: 'Urgency', detail: 'High pressure tactics' }],
+      finalAssessment: { 
+        summary: 'Likely phishing attempt',
+        falsePositiveRisk: 0.1
+      }
+    };
+
+    createAnalysisUI(results, 'GMAIL', PROVIDERS);
+
+    const banners = document.querySelectorAll('.phishing-detector-banner');
+    expect(banners.length).toBe(1);
+    expect(banners[0].classList.contains('risk-high')).toBe(true);
+  });
+
+  test('should handle missing container', () => {
+    document.body.innerHTML = '';
+    const results = { riskLevel: 'low' };
+    
+    expect(() => createAnalysisUI(results, 'GMAIL', PROVIDERS)).not.toThrow();
+  });
 }); 

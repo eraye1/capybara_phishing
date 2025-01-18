@@ -1,5 +1,6 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -22,5 +23,15 @@ module.exports = {
         { from: "icons", to: "icons" }
       ],
     }),
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
+      }
+    })
   ],
+  resolve: {
+    fallback: {
+      "process": false
+    }
+  }
 }; 
