@@ -17,7 +17,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 2. Model Architecture
 
 ### 2.1 Base Model Selection
-- **Foundation Model**: LLaMA 2 70B parameters
+- **Foundation Model**: LLaMA 3 3B parameters
 - **Rationale**: 
   - Superior instruction-following capabilities
   - Strong zero-shot performance
