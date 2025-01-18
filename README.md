@@ -19,6 +19,12 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
 - 🔐 Secure by design - your API key stays local
 - 💻 Optional local LLM mode in production builds
 
+## 📚 Documentation
+
+- [Product Specification](docs/spec.md) - Detailed product requirements and specifications
+- [ML Architecture](ml/ML.md) - Technical design document for the ML model
+- [WebLLM Integration](docs/webllm_readme.md) - Guide for WebLLM integration and local inference
+
 ## 📋 Prerequisites
 
 Common Requirements:
@@ -88,6 +94,7 @@ For Local LLM Mode:
      - For OpenAI: 'gpt-4' (default), 'gpt-3.5-turbo', etc.
      - For WebLLM: Model options depend on your GPU:
        - 6GB VRAM: 'Llama-3.2-3B-Instruct-q4f16_1-MLC' (heavily quantized, but we recommend using the latest MLC LLama model.)
+   - `backupModel`: Fallback model for OpenAI mode when rate limited (defaults to 'gpt-3.5-turbo')
 
 > ⚠️ **Local Model Note**: Model compatibility is highly dependent on your GPU's capabilities. Some models may fail to load or run slowly if your GPU doesn't meet the requirements. We recommend starting with the default model and adjusting based on your GPU's performance.
 
