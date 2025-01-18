@@ -1,0 +1,46 @@
+# Python specific ignores for ML directory
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env
+.env-python
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Model files and data
+models/
+*.bin
+*.pt
+*.pth
+*.onnx
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+data/raw/
+data/processed/
+outputs/*
+data/*
+
+# IDE
+.vscode/
+.idea/
+*.swp 

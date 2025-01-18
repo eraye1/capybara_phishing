@@ -1,11 +1,23 @@
 # LLaMA Fine-tuning for Phishing Detection: Technical Design Document
 
+> ⚠️ **WARNING: Active Development Area**
+> 
+> This document describes features and capabilities that are actively being developed. Many components may be:
+> - Incomplete or non-functional
+> - Subject to major changes
+> - Not yet implemented
+> - Experimental in nature
+>
+> Please treat this as a technical planning document rather than a description of current functionality. If you're interested in using these features, check the repository's current status or open an issue for the latest implementation details.
+
 ## 1. Project Overview
 
 ### 1.1 Objective
+
 Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detection system with superior instruction-following capabilities and domain adaptation for security contexts.
 
 ### 1.2 Key Technical Goals
+
 - Achieve >98% accuracy on phishing detection
 - Minimize false positives (<0.1%)
 - Fast inference time (<100ms)
@@ -17,21 +29,25 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 2. Model Architecture
 
 ### 2.1 Base Model Selection
-- **Foundation Model**: LLaMA 3 3B parameters
-- **Rationale**: 
+
+- **Foundation Model**: TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T
+- **Rationale**:
   - Superior instruction-following capabilities
   - Strong zero-shot performance
   - Open weights availability
   - Excellent context window (4K tokens)
 
 ### 2.2 Architecture Modifications
+
 - **LoRA Adaptation Layers**
+
   - Rank: 64
   - Alpha: 32
   - Target modules: q_proj, v_proj
   - Dropout: 0.05
 
 - **Additional Components**
+
   - Custom tokenizer extensions for security terminology
   - Specialized classification head
   - URL encoding layer
@@ -48,12 +64,14 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 3. Training Infrastructure
 
 ### 3.1 Hardware Requirements
+
 - 8x NVIDIA A100 80GB GPUs
 - 2TB NVMe SSD
 - 512GB RAM
 - InfiniBand interconnect
 
 ### 3.2 Software Stack
+
 - PyTorch 2.0+
 - DeepSpeed ZeRO-3
 - Hugging Face Transformers
@@ -61,6 +79,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - NVIDIA Apex
 
 ### 3.3 Distributed Training Setup
+
 - DeepSpeed ZeRO-3 configuration
 - Gradient checkpointing
 - Mixed precision training (bf16)
@@ -69,6 +88,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 4. Dataset Engineering
 
 ### 4.1 Data Sources
+
 1. OpenPhish corpus (1M+ samples)
 2. PhishTank database
 3. Internal security incident reports
@@ -79,6 +99,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 8. HTML/DOM structure variations
 
 ### 4.2 Data Processing Pipeline
+
 1. URL extraction and normalization
 2. HTML content parsing
 3. Text cleaning and standardization
@@ -87,6 +108,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 6. Token length optimization
 
 ### 4.3 Data Augmentation
+
 - Back-translation
 - URL mutation
 - Content paraphrasing
@@ -96,11 +118,13 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 5. Training Methodology
 
 ### 5.1 Pre-training Phase
+
 1. Domain adaptive pre-training on security corpus
 2. Masked language modeling on phishing-specific vocabulary
 3. Contrastive learning for URL patterns
 
 ### 5.2 Fine-tuning Phase
+
 1. Instruction tuning using security-focused prompts
 2. Supervised fine-tuning on phishing data
 3. RLHF (Reinforcement Learning from Human Feedback)
@@ -111,6 +135,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
    - DOM-specific pattern learning
 
 ### 5.3 Hyperparameters
+
 - Learning rate: 2e-5
 - Batch size: 1024 (global)
 - Warmup steps: 1000
@@ -121,6 +146,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 6. Evaluation Framework
 
 ### 6.1 Metrics
+
 - Accuracy
 - Precision
 - Recall
@@ -131,6 +157,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Instruction following score
 
 ### 6.2 Test Sets
+
 1. Hold-out validation set
 2. Zero-shot evaluation set
 3. Adversarial test set
@@ -138,6 +165,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 5. Cross-domain test set
 
 ### 6.3 Evaluation Protocols
+
 - Regular validation during training
 - A/B testing with current solutions
 - Human evaluation of instruction following
@@ -146,6 +174,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 7. Production Deployment
 
 ### 7.1 Model Optimization
+
 - Knowledge distillation
 - Quantization (INT8/INT4)
 - Pruning
@@ -157,6 +186,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Versioned model updates
 
 ### 7.2 Serving Infrastructure
+
 - WebLLM integration layer
 - Browser-based inference engine
 - Local storage management
@@ -165,6 +195,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Cross-origin security handling
 
 ### 7.3 CI/CD Pipeline
+
 - Automated testing
 - Model versioning
 - A/B testing framework
@@ -174,6 +205,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 8. Monitoring and Maintenance
 
 ### 8.1 Production Metrics
+
 - Model performance metrics
 - System health metrics
 - Data drift detection
@@ -181,6 +213,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Resource utilization
 
 ### 8.2 Update Strategy
+
 - Regular retraining schedule
 - Online learning capabilities
 - Emergency update protocol
@@ -189,6 +222,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 9. Security Considerations
 
 ### 9.1 Model Security
+
 - Input sanitization
 - Rate limiting
 - Access control
@@ -196,6 +230,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Privacy-preserving inference
 
 ### 9.2 Data Security
+
 - Data encryption
 - Access controls
 - Compliance requirements
@@ -205,22 +240,26 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 10. Timeline and Milestones
 
 ### Phase 1: Infrastructure Setup (2 weeks)
+
 - Hardware procurement
 - Software stack setup
 - CI/CD pipeline establishment
 
 ### Phase 2: Data Engineering (4 weeks)
+
 - Data collection
 - Processing pipeline setup
 - Quality assurance
 
 ### Phase 3: Training (8 weeks)
+
 - Pre-training
 - Fine-tuning
 - Evaluation
 - Optimization
 
 ### Phase 4: Deployment (4 weeks)
+
 - Production infrastructure setup
 - Gradual rollout
 - Monitoring implementation
@@ -228,12 +267,14 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 11. Success Criteria
 
 ### 11.1 Technical Metrics
+
 - 98% accuracy on test set
 - <100ms inference time
 - <0.1% false positive rate
 - 95% instruction following accuracy
 
 ### 11.2 Business Metrics
+
 - 90% reduction in successful phishing attacks
 - 80% reduction in manual review time
 - 99.9% system uptime
@@ -242,12 +283,14 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 12. Future Improvements
 
 ### 12.1 Model Enhancements
+
 - Multi-modal capabilities
 - Cross-lingual support
 - Real-time adaptation
 - Federated learning
 
 ### 12.2 System Enhancements
+
 - Auto-ML integration
 - Automated data collection
 - Self-healing capabilities
@@ -264,6 +307,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 14. Browser Integration Specifications
 
 ### 14.1 WebLLM Integration
+
 - Custom WebAssembly build pipeline
 - Memory-mapped model loading
 - Streaming inference optimization
@@ -271,6 +315,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - GPU acceleration when available
 
 ### 14.2 Extension Architecture
+
 - Background worker process
 - Content script injection
 - DOM manipulation safety
@@ -279,6 +324,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Update mechanism
 
 ### 14.3 Performance Optimization
+
 - Incremental model loading
 - Lazy feature computation
 - Memory usage monitoring
@@ -286,6 +332,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Network usage optimization
 
 ### 14.4 User Privacy
+
 - Local-only inference
 - Data minimization
 - Secure storage practices
@@ -295,6 +342,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 ## 15. Deployment Strategy
 
 ### 15.1 Chrome Web Store
+
 - Phased rollout plan
 - Version control
 - Update frequency
@@ -302,6 +350,7 @@ Fine-tune a LLaMA foundation model to create a state-of-the-art phishing detecti
 - Analytics integration
 
 ### 15.2 Enterprise Deployment
+
 - Group policy configuration
 - Network administrator controls
 - Compliance documentation
