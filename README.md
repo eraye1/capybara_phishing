@@ -1,8 +1,8 @@
 # 🛡️ Capybara - AI-Powered Email Security
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/eraye1/capybara_phishing/actions/workflows/tests.yml/badge.svg)](https://github.com/eraye1/capybara_phishing/actions)
-[![Coverage Status](https://coveralls.io/repos/github/eraye1/capybara_phishing/badge.svg?branch=main)](https://coveralls.io/github/eraye1/capybara_phishing?branch=main)
+[![CI](https://github.com/eraye1/capybara_phishing/actions/workflows/ci.yml/badge.svg)](https://github.com/eraye1/capybara_phishing/actions)
+[![codecov](https://codecov.io/gh/eraye1/capybara_phishing/branch/main/graph/badge.svg)](https://codecov.io/gh/eraye1/capybara_phishing)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
