@@ -25,7 +25,7 @@ global.MutationObserver = class {
     this.callback = callback;
   }
   disconnect() {}
-  observe(element, initObject) {
+  observe(element, _initObject) {
     // Simulate an immediate mutation
     this.callback([
       {

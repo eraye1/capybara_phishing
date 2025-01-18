@@ -25,7 +25,7 @@ global.MutationObserver = class {
     this.callback = callback;
   }
   disconnect() {}
-  observe(element, initObject) {
+  observe(element, _initObject) {
     // Simulate an immediate mutation
     this.callback([
       {
@@ -58,3 +58,33 @@ Object.defineProperty(window.location, 'hostname', {
   writable: true,
   value: '',
 });
+
+// Mock Chrome API
+global.chrome = {
+  runtime: {
+    onMessage: {
+      addListener: jest.fn((listener) => {
+        chrome.runtime.onMessage.callback = listener;
+      }),
+      callback: null,
+    },
+    sendMessage: jest.fn((_message, _callback) => {
+      // Mock implementation
+    }),
+  },
+};
+
+// Mock WebLLM
+jest.mock('@mlc-ai/web-llm', () => ({
+  CreateMLCEngine: jest.fn().mockImplementation(() => ({
+    chat: {
+      completions: {
+        create: jest.fn(),
+      },
+    },
+  })),
+}));
+
+// Mock DOM methods
+global.document.querySelector = jest.fn();
+global.document.createElement = jest.fn();

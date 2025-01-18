@@ -63,7 +63,7 @@ describe('Content Script Core', () => {
       status.lastUpdated = Date.now();
     });
 
-    analyzeEmail.mockImplementation(async (emailData) => {
+    analyzeEmail.mockImplementation(async (_emailData) => {
       try {
         await global.fetch();
         return { isPhishing: false, confidenceScore: 0.95, riskLevel: 'low' };

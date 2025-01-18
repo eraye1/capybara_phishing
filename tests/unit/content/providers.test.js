@@ -1,5 +1,12 @@
 import { detectProvider, extractEmailContent, PROVIDERS } from '../../../src/content/providers';
 
+describe('Email Provider Configuration', () => {
+  test('PROVIDERS should define supported email providers', () => {
+    expect(PROVIDERS).toBeDefined();
+    expect(Object.keys(PROVIDERS)).toContain('GMAIL');
+  });
+});
+
 describe('Email Provider Detection', () => {
   beforeEach(() => {
     window.location = {

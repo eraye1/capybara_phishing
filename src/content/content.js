@@ -24,28 +24,32 @@ const AI_CONFIG = {
 
 // Initialize WebLLM engine
 async function initializeEngine() {
-  console.log('Initializing WebLLM engine');
   if (AI_CONFIG.provider === 'webllm') {
     try {
-      console.log('About to create MLCEngine');
       engine = await CreateMLCEngine('SmolLM2-360M-Instruct-q4f16_1-MLC', {
-        initProgressCallback: (progress) => {
-          console.log('Model loading progress:', JSON.stringify(progress));
+        initProgressCallback: (_progress) => {
+          // Progress callback
         },
       });
-      console.log('MLCEngine created successfully');
       status.isLoaded = true;
       status.lastUpdated = Date.now();
     } catch (error) {
-      console.error('Failed to initialize WebLLM:', error.message, error.stack);
       status.isLoaded = false;
     }
   } else if (AI_CONFIG.provider === 'openai') {
-    console.log('OpenAI provider selected');
     status.isLoaded = true;
     status.lastUpdated = Date.now();
     return;
   }
+}
+
+// Extract email data for analysis
+async function extractEmailData() {
+  const provider = detectProvider();
+  if (!provider) {
+    throw new Error('No supported email provider detected');
+  }
+  return extractEmailContent(provider);
 }
 
 // Main observer to detect when emails are opened
@@ -56,30 +60,55 @@ const observer = new MutationObserver(async (mutations) => {
   for (const mutation of mutations) {
     const emailContainer = mutation.target.querySelector(PROVIDERS[provider].container);
     if (emailContainer && !emailContainer.dataset.analyzed) {
-      console.log('Found unanalyzed email container');
       emailContainer.dataset.analyzed = 'true';
 
-      const emailContent = extractEmailContent(provider);
-
-      // Show loading state
-      const loadingBanner = showLoadingState(provider, PROVIDERS);
-
-      // Send to background script for analysis
-      console.log('Sending content for analysis');
-      const results = await analyzeEmail(emailContent);
-
-      console.log('Received analysis results:', results);
-      // Replace loading state with results
-      createAnalysisUI(results, provider, PROVIDERS);
+      try {
+        const emailData = await extractEmailData();
+        const loadingBanner = showLoadingState(provider, PROVIDERS);
+        
+        // Show loading state while analyzing
+        status.analyzing++;
+        
+        const results = await analyzeEmail(emailData);
+        createAnalysisUI(results, provider, PROVIDERS);
+        
+        status.analyzing--;
+        if (loadingBanner) {
+          loadingBanner.remove();
+        }
+      } catch (error) {
+        console.error('Error analyzing email:', error);
+      }
     }
   }
 });
 
-console.log('Starting observer');
 // Start observing
 observer.observe(document.body, {
   childList: true,
   subtree: true,
+});
+
+// Initialize when content script loads
+initializeEngine();
+
+// Handle messages from popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'GET_STATUS') {
+    sendResponse(status);
+  }
+
+  if (message.type === 'UPDATE_MODEL') {
+    initializeEngine().then(() => sendResponse(status));
+    return true;
+  }
+
+  if (message.type === 'CLEAR_CACHE') {
+    status.analyzing = 0;
+    status.lastUpdated = null;
+    initializeEngine().then(() => sendResponse(status));
+    return true;
+  }
 });
 
 // Analyze email content using WebLLM
@@ -171,8 +200,6 @@ async function analyzeEmail(emailData) {
   - Assess reasonableness of requests`;
 
   try {
-    console.log('Starting analysis with provider:', AI_CONFIG.provider);
-
     let response;
     if (AI_CONFIG.provider === 'webllm') {
       response = await Promise.race([
@@ -197,35 +224,25 @@ async function analyzeEmail(emailData) {
       response = await analyzeEmailWithOpenAI(prompt);
     }
 
-    console.log('Response received:', response);
     let parsedResponse;
-    try {
-      const content = response.choices[0].message.content;
-      console.log('Raw response:', content);
+    const content = response.choices[0].message.content;
 
-      // Sanitize the response before parsing
-      const sanitizedContent = content.replace(/(\d+\.\d{2})\d+/g, '$1');
-      console.log('Sanitized response:', sanitizedContent);
+    // Sanitize the response before parsing
+    const sanitizedContent = content.replace(/(\d+\.\d{2})\d+/g, '$1');
 
-      parsedResponse = JSON.parse(sanitizedContent);
+    parsedResponse = JSON.parse(sanitizedContent);
 
-      // Ensure confidenceScore is properly formatted
-      if (typeof parsedResponse.confidenceScore === 'number') {
-        parsedResponse.confidenceScore = Math.min(
-          1,
-          Math.max(0, Number(parsedResponse.confidenceScore.toFixed(2)))
-        );
-      }
-    } catch (parseError) {
-      console.error('Failed to parse response:', parseError);
-      throw parseError;
+    // Ensure confidenceScore is properly formatted
+    if (typeof parsedResponse.confidenceScore === 'number') {
+      parsedResponse.confidenceScore = Math.min(
+        1,
+        Math.max(0, Number(parsedResponse.confidenceScore.toFixed(2)))
+      );
     }
 
-    console.log('Parsed response:', parsedResponse);
     status.analyzing++;
     return parsedResponse;
   } catch (error) {
-    console.error('Analysis failed:', error.message, error.stack);
     return {
       isPhishing: false,
       confidenceScore: 0,
@@ -309,11 +326,8 @@ async function analyzeEmailWithOpenAI(prompt) {
 
     return response;
   } catch (error) {
-    console.error('OpenAI API error:', error);
-
     // If it's a rate limit error or model overload, try backup model
     if (error.message.includes('rate_limit') || error.message.includes('overloaded')) {
-      console.log('Attempting with backup model...');
       const backupResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -346,32 +360,3 @@ async function analyzeEmailWithOpenAI(prompt) {
     throw error;
   }
 }
-
-// Initialize when content script loads
-initializeEngine();
-
-// Handle messages from popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log(
-    'Content script received message:',
-    message.type,
-    'Current status:',
-    JSON.stringify(status)
-  );
-
-  if (message.type === 'GET_STATUS') {
-    sendResponse(status);
-  }
-
-  if (message.type === 'UPDATE_MODEL') {
-    initializeEngine().then(() => sendResponse(status));
-    return true;
-  }
-
-  if (message.type === 'CLEAR_CACHE') {
-    status.analyzing = 0;
-    status.lastUpdated = null;
-    initializeEngine().then(() => sendResponse(status));
-    return true;
-  }
-});
