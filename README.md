@@ -87,10 +87,7 @@ For Local LLM Mode:
    - `model`: The primary model to use
      - For OpenAI: 'gpt-4' (default), 'gpt-3.5-turbo', etc.
      - For WebLLM: Model options depend on your GPU:
-       - 6GB VRAM: 'Llama-2-7b-chat-hf-q4f16_1' (heavily quantized)
-       - 8GB VRAM: 'SmolLM2-360M-Instruct-q4f16_1-MLC' (default)
-       - 12GB+ VRAM: 'Llama-2-13b-chat-hf-q4f32_1' (better accuracy)
-   - `backupModel`: Fallback model for OpenAI mode when rate limited (defaults to 'gpt-3.5-turbo')
+       - 6GB VRAM: 'Llama-3.2-3B-Instruct-q4f16_1-MLC' (heavily quantized, but we recommend using the latest MLC LLama model.)
 
 > ⚠️ **Local Model Note**: Model compatibility is highly dependent on your GPU's capabilities. Some models may fail to load or run slowly if your GPU doesn't meet the requirements. We recommend starting with the default model and adjusting based on your GPU's performance.
 

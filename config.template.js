@@ -6,5 +6,5 @@ export const CONFIG = {
 
   // Or for WebLLM local mode:
   // provider: 'webllm',
-  // model: 'SmolLM2-360M-Instruct-q4f16_1-MLC', // Local model to use
+  // model: 'Llama-3.2-3B-Instruct-q4f16_1-MLC', // Local model to use
 };

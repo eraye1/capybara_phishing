@@ -8,6 +8,11 @@ let status = {
   isLoaded: false,
   lastUpdated: null,
   analyzing: 0,
+  provider: null,
+  stage: 'idle',
+  progress: 0,
+  message: '',
+  error: null,
 };
 
 // Configuration toggle
@@ -27,23 +32,86 @@ const AI_CONFIG = {
 
 // Initialize WebLLM engine
 async function initializeEngine() {
+  status.provider = AI_CONFIG.provider;
+  status.stage = 'initializing';
+  status.message = 'Starting initialization...';
+  updatePopup();
+
   if (AI_CONFIG.provider === 'webllm') {
     try {
+      if (!CreateMLCEngine) {
+        status.error = 'WebLLM library not loaded properly';
+        status.stage = 'error';
+        updatePopup();
+        throw new Error(status.error);
+      }
+
+      status.message = 'Creating engine instance...';
+      updatePopup();
+
       engine = await CreateMLCEngine(AI_CONFIG.webllm.model, {
-        initProgressCallback: (_progress) => {
-          // Progress callback
+        initProgressCallback: (progress) => {
+          status.progress = Math.round(progress * 100);
+          status.message = `Loading model: ${status.progress}%`;
+          updatePopup();
+        },
+        logger: {
+          info: (msg) => {
+            status.message = msg;
+            updatePopup();
+          },
+          warn: (msg) => {
+            status.message = `Warning: ${msg}`;
+            updatePopup();
+          },
+          error: (msg) => {
+            status.error = msg;
+            status.stage = 'error';
+            updatePopup();
+          },
         },
       });
+
+      if (!engine) {
+        status.error = 'Failed to create WebLLM engine';
+        status.stage = 'error';
+        updatePopup();
+        throw new Error(status.error);
+      }
+
       status.isLoaded = true;
       status.lastUpdated = Date.now();
+      status.stage = 'ready';
+      status.message = 'Engine ready';
+      status.error = null;
+      updatePopup();
     } catch (error) {
+      status.error = error.message;
+      status.stage = 'error';
       status.isLoaded = false;
+      updatePopup();
+      throw error;
     }
   } else if (AI_CONFIG.provider === 'openai') {
     status.isLoaded = true;
     status.lastUpdated = Date.now();
+    status.stage = 'ready';
+    status.message = 'OpenAI mode ready';
+    status.error = null;
+    updatePopup();
     return;
   }
+}
+
+// Helper function to update popup
+function updatePopup() {
+  chrome.runtime.sendMessage({
+    type: 'STATUS_UPDATE',
+    status: {
+      ...status,
+      timestamp: Date.now(),
+    },
+  });
 }
 
 // Extract email data for analysis
@@ -71,9 +139,10 @@ const observer = new MutationObserver(async (mutations) => {
 
         // Show loading state while analyzing
         status.analyzing++;
+        createAnalysisUI({ riskLevel: 'analyzing' }, provider, PROVIDERS, status);
 
         const results = await analyzeEmail(emailData);
-        createAnalysisUI(results, provider, PROVIDERS);
+        createAnalysisUI(results, provider, PROVIDERS, status);
 
         status.analyzing--;
         if (loadingBanner) {
@@ -81,6 +150,16 @@ const observer = new MutationObserver(async (mutations) => {
         }
       } catch (error) {
         console.error('Error analyzing email:', error);
+        status.error = error.message;
+        createAnalysisUI(
+          {
+            riskLevel: 'error',
+            finalAssessment: { summary: 'Error analyzing email: ' + error.message },
+          },
+          provider,
+          PROVIDERS,
+          status
+        );
       }
     }
   }
@@ -95,32 +174,85 @@ observer.observe(document.body, {
 // Initialize when content script loads
 initializeEngine();
 
-// Handle messages from popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'GET_STATUS') {
-    sendResponse(status);
-  }
-
-  if (message.type === 'UPDATE_MODEL') {
-    initializeEngine().then(() => sendResponse(status));
-    return true;
-  }
-
-  if (message.type === 'CLEAR_CACHE') {
-    status.analyzing = 0;
-    status.lastUpdated = null;
-    initializeEngine().then(() => sendResponse(status));
-    return true;
-  }
-});
+// Remove message handling since we removed the buttons
 
 // Analyze email content using WebLLM
 async function analyzeEmail(emailData) {
   if (!status.isLoaded) {
-    await initializeEngine();
+    try {
+      await initializeEngine();
+    } catch (initError) {
+      return {
+        isPhishing: false,
+        confidenceScore: 0,
+        riskLevel: 'unknown',
+        riskFactors: [
+          {
+            category: 'Error',
+            detail: 'Failed to initialize WebLLM engine: ' + initError.message,
+            severity: 0,
+            falsePositiveRisk: 1,
+          },
+        ],
+        // ... rest of the error response structure ...
+      };
+    }
   }
 
-  const prompt = `You are an expert email security system. Analyze this email carefully, considering both phishing indicators AND legitimate business patterns.
+  if (!status.isLoaded) {
+    throw new Error('WebLLM engine failed to initialize');
+  }
+
+  // Simplified prompt for WebLLM mode
+  const webllmPrompt = `Analyze this email for phishing risks. Keep it simple.
+
+Email Subject: ${emailData.subject}
+Email Body: ${emailData.body}
+Attachments: ${emailData.attachments.map((a) => `${a.name} (${a.type})`).join(', ') || 'None'}
+
+Look for:
+1. Urgency or threats
+2. Requests for sensitive information
+3. Suspicious links or attachments
+4. Poor grammar or formatting
+5. Mismatched sender info
+
+Respond with a JSON object containing:
+{
+  "isPhishing": true/false,
+  "confidenceScore": 0-1 number,
+  "riskLevel": "low"/"medium"/"high",
+  "legitimatePatterns": {
+    "matches": ["list", "of", "good", "patterns"],
+    "confidence": 0-1 number
+  },
+  "riskFactors": [
+    {
+      "category": "what type of risk",
+      "detail": "explanation",
+      "severity": 0-1 number,
+      "falsePositiveRisk": 0-1 number
+    }
+  ],
+  "contextAnalysis": {
+    "businessContext": "brief explanation",
+    "workflowValidity": true/false,
+    "timingAppropriate": true/false
+  },
+  "attachmentRisk": {
+    "level": "low"/"medium"/"high",
+    "details": "brief explanation",
+    "legitimateUseCase": "valid reason or null"
+  },
+  "finalAssessment": {
+    "summary": "one line summary",
+    "confidenceInAssessment": 0-1 number,
+    "falsePositiveRisk": 0-1 number
+  }
+}`;
+
+  // Full prompt for OpenAI mode
+  const openaiPrompt = `You are an expert email security system. Analyze this email carefully, considering both phishing indicators AND legitimate business patterns.
   
   CONTEXT ANALYSIS:
   1. Business Communication Patterns:
@@ -205,47 +337,70 @@ async function analyzeEmail(emailData) {
   try {
     let response;
     if (AI_CONFIG.provider === 'webllm') {
+      console.debug('[WebLLM] Starting analysis with model:', AI_CONFIG.webllm.model);
+      console.debug('[WebLLM] Email data length:', emailData.body.length);
+      console.info('[WebLLM] WebLLM prompt:', webllmPrompt);
       response = await Promise.race([
         engine.chat.completions.create({
           messages: [
             {
               role: 'system',
               content:
-                'You are an enterprise email security system with deep understanding of business communication patterns. Focus on reducing false positives while maintaining security. Format all numbers with maximum 2 decimal places.',
+                'You are a simple email security checker. Keep responses brief and numbers to 2 decimal places.',
             },
-            { role: 'user', content: prompt },
+            { role: 'user', content: webllmPrompt },
           ],
           temperature: 0.1,
-          max_tokens: 3000, // Increased for more detailed analysis
+          max_tokens: 1000, // Reduced for simpler responses
           response_format: { type: 'json_object' },
         }),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Chat completion timed out after 30s')), 60000)
         ),
       ]);
+
+      console.debug('[WebLLM] Raw response:', response);
     } else if (AI_CONFIG.provider === 'openai') {
-      response = await analyzeEmailWithOpenAI(prompt);
+      response = await analyzeEmailWithOpenAI(openaiPrompt);
     }
 
     let parsedResponse;
     const content = response.choices[0].message.content;
+    console.debug('[WebLLM] Response content:', content);
 
     // Sanitize the response before parsing
     const sanitizedContent = content.replace(/(\d+\.\d{2})\d+/g, '$1');
+    console.info('[WebLLM] Sanitized content:', sanitizedContent);
 
-    parsedResponse = JSON.parse(sanitizedContent);
+    try {
+      parsedResponse = JSON.parse(sanitizedContent);
+      console.info('[WebLLM] Parsed response:', parsedResponse);
+    } catch (parseError) {
+      console.error('[WebLLM] Failed to parse response:', parseError);
+      throw new Error(`Failed to parse WebLLM response: ${parseError.message}`);
+    }
 
-    // Ensure confidenceScore is properly formatted
+    // Validate and fix confidence score
     if (typeof parsedResponse.confidenceScore === 'number') {
-      parsedResponse.confidenceScore = Math.min(
-        1,
-        Math.max(0, Number(parsedResponse.confidenceScore.toFixed(2)))
-      );
+      if (isNaN(parsedResponse.confidenceScore)) {
+        console.warn('[WebLLM] Confidence score is NaN, defaulting to 0');
+        parsedResponse.confidenceScore = 0;
+      } else {
+        parsedResponse.confidenceScore = Math.min(
+          1,
+          Math.max(0, Number(parsedResponse.confidenceScore.toFixed(2)))
+        );
+        console.debug('[WebLLM] Normalized confidence score:', parsedResponse.confidenceScore);
+      }
+    } else {
+      console.warn('[WebLLM] Confidence score is not a number:', parsedResponse.confidenceScore);
+      parsedResponse.confidenceScore = 0;
     }
 
     status.analyzing++;
     return parsedResponse;
   } catch (error) {
+    console.error('[WebLLM] Analysis error:', error);
     return {
       isPhishing: false,
       confidenceScore: 0,
