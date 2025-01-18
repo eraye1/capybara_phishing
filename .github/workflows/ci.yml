@@ -39,6 +39,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          slug: eraye1/capybara_phishing
           fail_ci_if_error: true
 
   build:
