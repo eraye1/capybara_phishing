@@ -1,100 +1,84 @@
-# Phishing Detection with LLaMA
+# ML Pipeline for Phishing Detection
 
-This project fine-tunes a TinyLLaMA model for phishing detection using LoRA (Low-Rank Adaptation) and the PEFT (Parameter-Efficient Fine-Tuning) framework.
+This directory contains the machine learning pipeline for phishing detection using TinyLLaMA.
+
+## Quick Start
+
+1. Setup environment:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+2. Generate synthetic training data:
+```bash
+python src/data/generate_synthetic.py
+```
+This will create synthetic data in `data/synthetic/`:
+- train.jsonl (800 samples)
+- val.jsonl (100 samples)
+- test.jsonl (100 samples)
+
+3. Train the model:
+```bash
+python src/training/train.py
+```
 
 ## Project Structure
 
 ```
 ml/
-├── data/
-│   └── synthetic/      # Generated synthetic dataset
-├── src/
-│   ├── config/         # Configuration files
-│   ├── data/           # Data loading and processing
-│   ├── models/         # Model architecture
-│   └── training/       # Training scripts
-├── outputs/            # Training outputs and checkpoints
-└── tests/             # Unit tests
+├── data/               # Data directory
+│   ├── raw/           # Raw data sources
+│   └── synthetic/     # Generated synthetic data
+├── src/               # Source code
+│   ├── data/          # Data processing
+│   ├── models/        # Model definitions
+│   └── training/      # Training scripts
+└── outputs/           # Training outputs
 ```
 
-## Setup
+## Configuration
 
-1. Create a Python virtual environment:
+Training configuration is managed through Hydra. See `src/config/` for configuration files:
+- `config.yaml`: Main configuration
+- `model.yaml`: Model-specific settings
+- `training.yaml`: Training hyperparameters
 
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Unix/macOS
-```
+## Development Workflow
 
-2. Install dependencies:
+1. Data Preparation
+   - Generate synthetic data
+   - Validate data format and quality
+   - Check data distribution
 
-```bash
-pip install -e .
-```
+2. Training
+   - Configure hyperparameters
+   - Run training
+   - Monitor with WandB
 
-## Training
+3. Evaluation
+   - Validate on test set
+   - Generate metrics
+   - Export model
 
-The project uses Hydra for configuration management. The main configuration file is `src/config/model_config.py`.
+4. Deployment
+   - Convert to MLC format
+   - Optimize for browser
+   - Package for WebLLM
 
-To train the model:
+## Monitoring
 
-```bash
-python3 -m src.training.train
-```
+Training progress can be monitored through:
+- Command line output
+- WandB dashboard (when enabled)
+- Training logs in outputs/
 
-This will:
+## Model Export
 
-1. Generate synthetic training data if it doesn't exist
-2. Initialize the TinyLLaMA model with LoRA adapters
-3. Train the model using the specified configuration
+After training, models can be exported in two formats:
+1. Hugging Face format (for API deployment)
+2. MLC format (for browser deployment)
 
-### Configuration
-
-Key configuration parameters:
-
-- Model: TinyLLaMA 1.1B with LoRA adapters
-- Training:
-  - Learning rate: 2e-5
-  - Batch size: 1 (optimized for CPU training)
-  - Max sequence length: 512
-  - Training steps: 1000
-  - Warmup steps: 100
-  - Gradient accumulation steps: 4
-
-### Data
-
-The project uses synthetic data for training, generated with:
-
-- 800 training examples
-- 100 validation examples
-- 100 test examples
-- 50/50 split between phishing and non-phishing examples
-
-## Model Architecture
-
-The model uses:
-
-- Base model: TinyLLaMA 1.1B
-- LoRA adaptation with:
-  - Rank: 64
-  - Alpha: 32
-  - Target modules: query and value projections
-  - Dropout: 0.05
-
-## Development
-
-The project uses:
-
-- Black for code formatting
-- isort for import sorting
-- ruff for linting
-- pytest for testing
-
-## Outputs
-
-Training outputs are saved in the `outputs/` directory, including:
-
-- Model checkpoints
-- Training logs
-- Evaluation metrics
-- Hydra configuration snapshots
+See the deployment section in ML.md for detailed deployment instructions.
