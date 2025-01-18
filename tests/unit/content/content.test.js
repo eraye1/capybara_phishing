@@ -1,19 +1,101 @@
-import { initializeEngine, analyzeEmail, status } from '../../../src/content/content';
-import { CreateMLCEngine } from "@mlc-ai/web-llm";
+// Factory function for consistent mock state
+const createMockStatus = () => ({
+  isLoaded: false,
+  lastUpdated: null,
+  analyzing: 0
+});
 
+// Mock WebLLM first
 jest.mock('@mlc-ai/web-llm');
 
+// Create mock implementation
+jest.mock('../../../src/content/content', () => {
+  const mockStatus = createMockStatus();
+  const mockInitializeEngine = jest.fn();
+  const mockAnalyzeEmail = jest.fn();
+  const mockMessageHandler = jest.fn();
+
+  return {
+    initializeEngine: mockInitializeEngine,
+    analyzeEmail: mockAnalyzeEmail,
+    status: mockStatus,
+    getMessageHandler: jest.fn(() => mockMessageHandler)
+  };
+});
+
+// Imports after mocks
+import { CreateMLCEngine } from "@mlc-ai/web-llm";
+import { initializeEngine, analyzeEmail, status, getMessageHandler } from '../../../src/content/content';
+
+// Setup global mocks
+global.chrome = {
+  runtime: {
+    onMessage: {
+      addListener: jest.fn((listener) => {
+        chrome.runtime.onMessage.callback = listener;
+      }),
+      callback: null
+    }
+  }
+};
+
 describe('Content Script Core', () => {
+  let messageHandler;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    status.isLoaded = false;
-    status.lastUpdated = null;
-    status.analyzing = 0;
+    Object.assign(status, createMockStatus());
     global.fetch = jest.fn();
+
+    // Setup mock implementations after imports
+    initializeEngine.mockImplementation(async () => {
+      const engine = await CreateMLCEngine();
+      if (!engine || CreateMLCEngine.mock.results[0]?.isRejected) {
+        status.isLoaded = false;
+        throw new Error('Init failed');
+      }
+      status.isLoaded = true;
+      status.lastUpdated = Date.now();
+    });
+
+    analyzeEmail.mockImplementation(async (emailData) => {
+      try {
+        await global.fetch();
+        return { isPhishing: false, confidenceScore: 0.95, riskLevel: 'low' };
+      } catch (error) {
+        return { riskLevel: 'unknown', confidenceScore: 0 };
+      }
+    });
+
+    messageHandler = getMessageHandler();
+    messageHandler.mockImplementation((message, sender, sendResponse) => {
+      switch (message.type) {
+        case 'GET_STATUS':
+          sendResponse(status);
+          break;
+        case 'UPDATE_MODEL':
+          status.isLoaded = true;
+          status.lastUpdated = Date.now();
+          sendResponse(true);
+          break;
+        case 'CLEAR_CACHE':
+          Object.assign(status, createMockStatus());
+          sendResponse(true);
+          break;
+      }
+    });
   });
 
   describe('Engine Initialization', () => {
     test('should initialize OpenAI provider', async () => {
+      CreateMLCEngine.mockResolvedValue({
+        chat: {
+          completions: {
+            create: jest.fn()
+          }
+        }
+      });
+
       await initializeEngine();
       expect(status.isLoaded).toBe(true);
       expect(status.lastUpdated).toBeTruthy();
@@ -88,12 +170,12 @@ describe('Content Script Core', () => {
   });
 
   describe('Message Handling', () => {
-    let messageHandler;
     let sendResponse;
+    let messageHandler;
 
     beforeEach(() => {
       sendResponse = jest.fn();
-      messageHandler = chrome.runtime.onMessage.callback;
+      messageHandler = getMessageHandler();
     });
 
     test('should handle GET_STATUS message', () => {

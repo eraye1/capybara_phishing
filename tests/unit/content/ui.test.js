@@ -21,7 +21,7 @@ describe('UI Generation', () => {
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
 
-    const banner = document.querySelector('.phishing-detector-banner');
+    const banner = document.querySelector('.security-analysis');
     expect(banner).toBeTruthy();
     expect(banner.classList.contains('risk-low')).toBe(true);
   });
@@ -29,7 +29,7 @@ describe('UI Generation', () => {
   test('should update existing UI when analyzing same email', () => {
     document.body.innerHTML = `
       <div class="adn ads">
-        <div class="phishing-detector-banner risk-low"></div>
+        <div class="security-analysis risk-low"></div>
       </div>
     `;
 
@@ -47,7 +47,7 @@ describe('UI Generation', () => {
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
 
-    const banners = document.querySelectorAll('.phishing-detector-banner');
+    const banners = document.querySelectorAll('.security-analysis');
     expect(banners.length).toBe(1);
     expect(banners[0].classList.contains('risk-high')).toBe(true);
   });
