@@ -1,8 +1,9 @@
 # LLaMA Fine-tuning for Phishing Detection: Technical Design Document
 
 > ⚠️ **WARNING: Active Development Area**
-> 
+>
 > This document describes features and capabilities that are actively being developed. Many components may be:
+>
 > - Incomplete or non-functional
 > - Subject to major changes
 > - Not yet implemented

@@ -20,12 +20,14 @@ ml/
 ## Setup
 
 1. Create a Python virtual environment:
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Unix/macOS
 ```
 
 2. Install dependencies:
+
 ```bash
 pip install -e .
 ```
@@ -41,6 +43,7 @@ python3 -m src.training.train
 ```
 
 This will:
+
 1. Generate synthetic training data if it doesn't exist
 2. Initialize the TinyLLaMA model with LoRA adapters
 3. Train the model using the specified configuration
@@ -61,6 +64,7 @@ Key configuration parameters:
 ### Data
 
 The project uses synthetic data for training, generated with:
+
 - 800 training examples
 - 100 validation examples
 - 100 test examples
@@ -69,6 +73,7 @@ The project uses synthetic data for training, generated with:
 ## Model Architecture
 
 The model uses:
+
 - Base model: TinyLLaMA 1.1B
 - LoRA adaptation with:
   - Rank: 64
@@ -79,6 +84,7 @@ The model uses:
 ## Development
 
 The project uses:
+
 - Black for code formatting
 - isort for import sorting
 - ruff for linting
@@ -87,7 +93,8 @@ The project uses:
 ## Outputs
 
 Training outputs are saved in the `outputs/` directory, including:
+
 - Model checkpoints
 - Training logs
 - Evaluation metrics
-- Hydra configuration snapshots 
+- Hydra configuration snapshots

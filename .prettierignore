@@ -1,0 +1,10 @@
+# Directories to ignore
+ml/
+dist/
+node_modules/
+coverage/
+build/
+
+# File patterns to ignore
+*.min.js
+*.bundle.js 
