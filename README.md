@@ -26,22 +26,26 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
 ## 🚀 Quick Start
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/capybara.git
    cd capybara
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Generate extension icons:
+
    ```bash
    ./create_icons.sh
    ```
 
 4. Build the extension:
+
    ```bash
    npm run build
    ```
@@ -54,16 +58,19 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
 ## 🛠️ Development
 
 Start the development server with hot reload:
+
 ```bash
 npm run dev
 ```
 
 Run tests:
+
 ```bash
 npm test
 ```
 
 Generate test coverage report:
+
 ```bash
 npm run coverage
 ```
@@ -78,6 +85,7 @@ We maintain high test coverage and quality standards:
 - Coverage thresholds: 95% statements, 90% branches
 
 Run the full test suite:
+
 ```bash
 npm run test:all
 ```
@@ -108,6 +116,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔒 Privacy
 
 Capybara is designed with privacy in mind:
+
 - No data collection
 - All processing happens locally
 - No external API calls
@@ -131,4 +140,4 @@ If you find this project useful, please consider giving it a star on GitHub!
 
 ---
 
-Made with ❤️ by the Capybara team 
+Made with ❤️ by the Capybara team

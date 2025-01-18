@@ -4,4 +4,4 @@ export const CONFIG = {
   API_ENDPOINT: 'https://api.openai.com/v1/chat/completions',
   MODEL: 'gpt-4-turbo-preview',
   // Add other configuration variables here
-}; 
+};

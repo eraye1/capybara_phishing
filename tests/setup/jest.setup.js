@@ -2,17 +2,20 @@
 global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            isPhishing: false,
-            confidenceScore: 0.95,
-            riskLevel: 'low'
-          })
-        }
-      }]
-    })
+    json: () =>
+      Promise.resolve({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                isPhishing: false,
+                confidenceScore: 0.95,
+                riskLevel: 'low',
+              }),
+            },
+          },
+        ],
+      }),
   })
 );
 
@@ -24,10 +27,12 @@ global.MutationObserver = class {
   disconnect() {}
   observe(element, initObject) {
     // Simulate an immediate mutation
-    this.callback([{
-      type: 'childList',
-      target: element
-    }]);
+    this.callback([
+      {
+        type: 'childList',
+        target: element,
+      },
+    ]);
   }
 };
 
@@ -46,7 +51,7 @@ window.location = {
   href: 'http://example.com',
   assign: jest.fn(),
   reload: jest.fn(),
-  replace: jest.fn()
+  replace: jest.fn(),
 };
 
 // Mock chrome API
@@ -56,7 +61,7 @@ global.chrome = {
       addListener: jest.fn((callback) => {
         global.chrome.runtime.onMessage.callback = callback;
         return callback;
-      })
-    }
-  }
-}; 
+      }),
+    },
+  },
+};

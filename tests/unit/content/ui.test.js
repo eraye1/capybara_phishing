@@ -13,10 +13,10 @@ describe('UI Generation', () => {
       contextAnalysis: { businessContext: 'Normal business email' },
       legitimatePatterns: { matches: ['Standard format'] },
       riskFactors: [],
-      finalAssessment: { 
+      finalAssessment: {
         summary: 'Safe email',
-        falsePositiveRisk: 0.1
-      }
+        falsePositiveRisk: 0.1,
+      },
     };
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
@@ -39,10 +39,10 @@ describe('UI Generation', () => {
       contextAnalysis: { businessContext: 'Suspicious email' },
       legitimatePatterns: { matches: [] },
       riskFactors: [{ category: 'Urgency', detail: 'High pressure tactics' }],
-      finalAssessment: { 
+      finalAssessment: {
         summary: 'Likely phishing attempt',
-        falsePositiveRisk: 0.1
-      }
+        falsePositiveRisk: 0.1,
+      },
     };
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
@@ -55,7 +55,7 @@ describe('UI Generation', () => {
   test('should handle missing container', () => {
     document.body.innerHTML = '';
     const results = { riskLevel: 'low' };
-    
+
     expect(() => createAnalysisUI(results, 'GMAIL', PROVIDERS)).not.toThrow();
   });
 
@@ -65,13 +65,13 @@ describe('UI Generation', () => {
       confidenceScore: 0.95,
       riskFactors: [
         { category: 'Urgency', severity: 0.8, detail: 'High pressure tactics' },
-        { category: 'Links', severity: 0.9, detail: 'Suspicious URLs' }
+        { category: 'Links', severity: 0.9, detail: 'Suspicious URLs' },
       ],
-      finalAssessment: { summary: 'High risk email' }
+      finalAssessment: { summary: 'High risk email' },
     };
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
-    
+
     const factors = document.querySelectorAll('.factor');
     expect(factors.length).toBe(2);
     expect(factors[0].querySelector('.factor-title').textContent).toBe('Urgency');
@@ -83,18 +83,18 @@ describe('UI Generation', () => {
       riskLevel: 'medium',
       confidenceScore: 0.8,
       riskFactors: [],
-      finalAssessment: { summary: 'Medium risk' }
+      finalAssessment: { summary: 'Medium risk' },
     };
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
-    
+
     const toggle = document.querySelector('.details-toggle');
     const analysis = document.querySelector('.security-analysis');
-    
+
     toggle.click();
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(analysis.classList.contains('expanded')).toBe(true);
-    
+
     toggle.click();
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(analysis.classList.contains('expanded')).toBe(false);
@@ -103,8 +103,8 @@ describe('UI Generation', () => {
   test('should try different insertion points', () => {
     // Test each insertion point in isolation
     const selectors = ['.ha', '.hP', '.aeF', '.adn.ads', '.gs'];
-    
-    selectors.forEach(selector => {
+
+    selectors.forEach((selector) => {
       document.body.innerHTML = `
         <div class="adn ads">
           ${selector === '.adn.ads' ? '' : `<div class="${selector.slice(1)}"></div>`}
@@ -115,14 +115,14 @@ describe('UI Generation', () => {
         riskLevel: 'low',
         confidenceScore: 0.9,
         riskFactors: [],
-        finalAssessment: { summary: 'Safe' }
+        finalAssessment: { summary: 'Safe' },
       };
 
       createAnalysisUI(results, 'GMAIL', PROVIDERS);
-      
+
       const banner = document.querySelector('.security-analysis');
       expect(banner).toBeTruthy();
-      
+
       if (selector === '.adn.ads') {
         // Should insert at the beginning of container
         const container = document.querySelector('.adn.ads');
@@ -136,16 +136,16 @@ describe('UI Generation', () => {
 
   test('should fallback to container insertion', () => {
     document.body.innerHTML = '<div class="adn ads"><div class="other-content"></div></div>';
-    
+
     const results = {
       riskLevel: 'low',
       confidenceScore: 0.9,
       riskFactors: [],
-      finalAssessment: { summary: 'Safe' }
+      finalAssessment: { summary: 'Safe' },
     };
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
-    
+
     const banner = document.querySelector('.security-analysis');
     const container = document.querySelector('.adn.ads');
     expect(container.firstChild).toBe(banner);
@@ -153,24 +153,24 @@ describe('UI Generation', () => {
 
   test('should handle different risk levels', () => {
     const levels = ['low', 'medium', 'high'];
-    
-    levels.forEach(level => {
+
+    levels.forEach((level) => {
       document.body.innerHTML = '<div class="adn ads"></div>';
       const results = {
         riskLevel: level,
         confidenceScore: 0.9,
         riskFactors: [],
-        finalAssessment: { summary: 'Test' }
+        finalAssessment: { summary: 'Test' },
       };
 
       createAnalysisUI(results, 'GMAIL', PROVIDERS);
-      
+
       const banner = document.querySelector('.security-analysis');
       expect(banner.classList.contains(`risk-${level}`)).toBe(true);
-      
+
       const message = banner.querySelector('.status-message');
       expect(message.textContent).toBeTruthy();
-      
+
       const icon = banner.querySelector('.status-icon');
       expect(icon).toBeTruthy();
     });
@@ -181,11 +181,11 @@ describe('UI Generation', () => {
       riskLevel: 'low',
       confidenceScore: 0.9,
       riskFactors: [],
-      finalAssessment: { summary: 'Safe' }
+      finalAssessment: { summary: 'Safe' },
     };
 
     createAnalysisUI(results, 'GMAIL', PROVIDERS);
-    
+
     const riskFactors = document.querySelector('.risk-factors');
     expect(riskFactors).toBeFalsy();
   });
@@ -195,7 +195,7 @@ describe('UI Generation', () => {
     const results1 = {
       riskLevel: 'low',
       confidenceScore: 0.9,
-      riskFactors: []
+      riskFactors: [],
     };
 
     createAnalysisUI(results1, 'GMAIL', PROVIDERS);
@@ -208,7 +208,7 @@ describe('UI Generation', () => {
       riskLevel: 'low',
       confidenceScore: 0.9,
       riskFactors: [],
-      finalAssessment: {}
+      finalAssessment: {},
     };
 
     createAnalysisUI(results2, 'GMAIL', PROVIDERS);
@@ -221,7 +221,7 @@ describe('UI Generation', () => {
       riskLevel: 'low',
       confidenceScore: 0.9,
       riskFactors: [],
-      finalAssessment: { summary: null }
+      finalAssessment: { summary: null },
     };
 
     createAnalysisUI(results3, 'GMAIL', PROVIDERS);
@@ -232,7 +232,7 @@ describe('UI Generation', () => {
   describe('Loading State', () => {
     test('should show loading state with spinner', () => {
       const loadingUI = showLoadingState('GMAIL', PROVIDERS);
-      
+
       expect(loadingUI).toBeTruthy();
       expect(loadingUI.classList.contains('is-loading')).toBe(true);
       expect(loadingUI.querySelector('.loading-indicator')).toBeTruthy();
@@ -242,8 +242,8 @@ describe('UI Generation', () => {
     test('should handle loading state insertion points', () => {
       // Test each insertion point in isolation
       const selectors = ['.ha', '.hP', '.aeF', '.adn.ads', '.gs'];
-      
-      selectors.forEach(selector => {
+
+      selectors.forEach((selector) => {
         document.body.innerHTML = `
           <div class="adn ads">
             ${selector === '.adn.ads' ? '' : `<div class="${selector.slice(1)}"></div>`}
@@ -252,7 +252,7 @@ describe('UI Generation', () => {
 
         const loadingUI = showLoadingState('GMAIL', PROVIDERS);
         expect(loadingUI).toBeTruthy();
-        
+
         if (selector === '.adn.ads') {
           // Should insert at the beginning of container
           const container = document.querySelector('.adn.ads');
@@ -273,21 +273,21 @@ describe('UI Generation', () => {
   describe('Status Icons', () => {
     test('should render all risk level icons', () => {
       const levels = ['low', 'medium', 'high', 'loading'];
-      
-      levels.forEach(level => {
+
+      levels.forEach((level) => {
         document.body.innerHTML = '<div class="adn ads"></div>';
         const results = {
           riskLevel: level,
           confidenceScore: 0.9,
           riskFactors: [],
-          finalAssessment: { summary: 'Test' }
+          finalAssessment: { summary: 'Test' },
         };
 
         createAnalysisUI(results, 'GMAIL', PROVIDERS);
-        
+
         const icon = document.querySelector('.status-icon');
         expect(icon).toBeTruthy();
-        
+
         if (level === 'loading') {
           expect(icon.classList.contains('loading')).toBe(true);
           expect(icon.querySelector('.spinner')).toBeTruthy();
@@ -304,11 +304,11 @@ describe('UI Generation', () => {
         riskLevel: 'unknown',
         confidenceScore: 0.9,
         riskFactors: [],
-        finalAssessment: { summary: 'Test' }
+        finalAssessment: { summary: 'Test' },
       };
 
       createAnalysisUI(results, 'GMAIL', PROVIDERS);
-      
+
       const icon = document.querySelector('.status-icon');
       expect(icon).toBeTruthy();
       expect(icon.classList.contains('loading')).toBe(true);
@@ -321,14 +321,14 @@ describe('UI Generation', () => {
         riskLevel: 'low',
         confidenceScore: 0.9,
         riskFactors: [],
-        finalAssessment: { summary: 'Test' }
+        finalAssessment: { summary: 'Test' },
       };
 
       createAnalysisUI(results, 'GMAIL', PROVIDERS);
-      
+
       const styles = document.getElementById('security-analysis-styles');
       const styleContent = styles.textContent;
-      
+
       // Check if mobile media query styles are present
       expect(styleContent).toContain('@media (max-width: 768px)');
       expect(styleContent).toContain('flex-direction: column');
@@ -341,18 +341,18 @@ describe('UI Generation', () => {
         riskLevel: 'low',
         confidenceScore: 0.9,
         riskFactors: [],
-        finalAssessment: { summary: 'Test' }
+        finalAssessment: { summary: 'Test' },
       };
 
       createAnalysisUI(results, 'GMAIL', PROVIDERS);
-      
+
       const styles = document.getElementById('security-analysis-styles');
       const styleContent = styles.textContent;
-      
+
       // Check if animations are present
       expect(styleContent).toContain('@keyframes rotate');
       expect(styleContent).toContain('@keyframes dash');
       expect(styleContent).toContain('@keyframes pulse');
     });
   });
-}); 
+});

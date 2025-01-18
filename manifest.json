@@ -3,22 +3,11 @@
   "name": "Email Phishing Detector",
   "version": "1.0.0",
   "description": "AI-powered phishing detection using WebLLM for secure email analysis",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "scripting",
-    "tabs"
-  ],
-  "host_permissions": [
-    "*://mail.google.com/*",
-    "*://*.hotmail.com/*"
-  ],
+  "permissions": ["activeTab", "storage", "scripting", "tabs"],
+  "host_permissions": ["*://mail.google.com/*", "*://*.hotmail.com/*"],
   "content_scripts": [
     {
-      "matches": [
-        "*://mail.google.com/*",
-        "*://*.hotmail.com/*"
-      ],
+      "matches": ["*://mail.google.com/*", "*://*.hotmail.com/*"],
       "js": ["content.js"],
       "css": ["styles.css"]
     }

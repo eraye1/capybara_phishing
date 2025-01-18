@@ -4,7 +4,7 @@ describe('Email Provider Detection', () => {
   beforeEach(() => {
     window.location = {
       hostname: '',
-      href: 'http://example.com'
+      href: 'http://example.com',
     };
   });
 
@@ -42,11 +42,13 @@ describe('Email Content Extraction', () => {
     expect(emailContent).toMatchObject({
       subject: 'Test Subject',
       body: 'Test Body Content',
-      attachments: [{
-        name: 'test.pdf',
-        type: 'application/pdf',
-        size: '1024'
-      }]
+      attachments: [
+        {
+          name: 'test.pdf',
+          type: 'application/pdf',
+          size: '1024',
+        },
+      ],
     });
   });
 
@@ -56,11 +58,11 @@ describe('Email Content Extraction', () => {
     expect(emailContent).toMatchObject({
       subject: '',
       body: '',
-      attachments: []
+      attachments: [],
     });
   });
 
   test('should handle invalid provider', () => {
     expect(() => extractEmailContent('INVALID')).toThrow();
   });
-}); 
+});

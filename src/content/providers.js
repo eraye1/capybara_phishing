@@ -3,14 +3,14 @@ export const PROVIDERS = {
     container: '.adn.ads',
     subject: '.hP',
     body: '.a3s',
-    attachments: '.aZo, .aQH'
+    attachments: '.aZo, .aQH',
   },
   HOTMAIL: {
     container: '.ReadMsgBody',
     subject: '.subject',
     body: '.message-body',
-    attachments: '.AttachmentTileGrid'
-  }
+    attachments: '.AttachmentTileGrid',
+  },
 };
 
 export function detectProvider() {
@@ -25,10 +25,10 @@ export function extractEmailContent(provider) {
   return {
     subject: document.querySelector(selectors.subject)?.textContent || '',
     body: document.querySelector(selectors.body)?.textContent || '',
-    attachments: Array.from(document.querySelectorAll(selectors.attachments)).map(el => ({
+    attachments: Array.from(document.querySelectorAll(selectors.attachments)).map((el) => ({
       name: el.getAttribute('data-name'),
       type: el.getAttribute('data-type'),
-      size: el.getAttribute('data-size')
-    }))
+      size: el.getAttribute('data-size'),
+    })),
   };
-} 
+}

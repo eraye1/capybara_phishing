@@ -1,4 +1,4 @@
-import { CreateMLCEngine } from "@mlc-ai/web-llm";
+import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { JSDOM } from 'jsdom';
 
 // Mock chrome API
@@ -9,14 +9,14 @@ global.chrome = {
         // Store the callback for later use
         global.chrome.runtime.onMessage.callback = callback;
         return callback;
-      })
-    }
-  }
+      }),
+    },
+  },
 };
 
 // Mock CreateMLCEngine
 jest.mock('@mlc-ai/web-llm', () => ({
-  CreateMLCEngine: jest.fn()
+  CreateMLCEngine: jest.fn(),
 }));
 
 // Mock the entire content.js module
@@ -25,7 +25,7 @@ jest.mock('../content.js', () => {
   const mockStatus = {
     isLoaded: false,
     lastUpdated: null,
-    analyzing: 0
+    analyzing: 0,
   };
 
   // Create mock functions
@@ -41,15 +41,15 @@ jest.mock('../content.js', () => {
         container: '.adn.ads',
         subject: '.hP',
         body: '.a3s',
-        attachments: '.aZo, .aQH'
+        attachments: '.aZo, .aQH',
       },
       HOTMAIL: {
         container: '.ReadMsgBody',
         subject: '.subject',
         body: '.message-body',
-        attachments: '.AttachmentTileGrid'
-      }
-    }
+        attachments: '.AttachmentTileGrid',
+      },
+    },
   };
 
   // Return the mock module
@@ -72,11 +72,11 @@ content.extractEmailContent.mockImplementation((provider) => {
   return {
     subject: document.querySelector(selectors.subject)?.textContent || '',
     body: document.querySelector(selectors.body)?.textContent || '',
-    attachments: Array.from(document.querySelectorAll(selectors.attachments)).map(el => ({
+    attachments: Array.from(document.querySelectorAll(selectors.attachments)).map((el) => ({
       name: el.getAttribute('data-name'),
       type: el.getAttribute('data-type'),
-      size: el.getAttribute('data-size')
-    }))
+      size: el.getAttribute('data-size'),
+    })),
   };
 });
 
@@ -95,7 +95,7 @@ content.initializeEngine.mockImplementation(async () => {
 content.analyzeEmail.mockImplementation(async () => ({
   isPhishing: false,
   confidenceScore: 0.95,
-  riskLevel: 'low'
+  riskLevel: 'low',
 }));
 
 content.createAnalysisUI.mockImplementation((results, provider) => {
@@ -115,30 +115,30 @@ content.createAnalysisUI.mockImplementation((results, provider) => {
 describe('Email Analysis System', () => {
   let dom;
   let originalStatus;
-  
+
   beforeEach(() => {
     // Store original status
     originalStatus = { ...content.status };
-    
+
     // Setup a fresh DOM for each test
     dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
     global.document = dom.window.document;
     global.window = dom.window;
-    
+
     // Setup location mock
     window.location = {
       hostname: '',
-      href: 'http://example.com'
+      href: 'http://example.com',
     };
-    
+
     // Reset all mocks
     jest.clearAllMocks();
-    
+
     // Reset status to initial state
     Object.assign(content.status, {
       isLoaded: false,
       lastUpdated: null,
-      analyzing: 0
+      analyzing: 0,
     });
   });
 
@@ -183,11 +183,13 @@ describe('Email Analysis System', () => {
       expect(emailContent).toMatchObject({
         subject: 'Test Subject',
         body: 'Test Body Content',
-        attachments: [{
-          name: 'test.pdf',
-          type: 'application/pdf',
-          size: '1024'
-        }]
+        attachments: [
+          {
+            name: 'test.pdf',
+            type: 'application/pdf',
+            size: '1024',
+          },
+        ],
       });
     });
 
@@ -197,7 +199,7 @@ describe('Email Analysis System', () => {
       expect(emailContent).toMatchObject({
         subject: '',
         body: '',
-        attachments: []
+        attachments: [],
       });
     });
   });
@@ -207,9 +209,9 @@ describe('Email Analysis System', () => {
       CreateMLCEngine.mockResolvedValue({
         chat: {
           completions: {
-            create: jest.fn()
-          }
-        }
+            create: jest.fn(),
+          },
+        },
       });
     });
 
@@ -221,22 +223,24 @@ describe('Email Analysis System', () => {
 
     test('should handle WebLLM initialization failure', async () => {
       CreateMLCEngine.mockRejectedValueOnce(new Error('Init failed'));
-      
+
       await expect(content.initializeEngine()).rejects.toThrow('Init failed');
       expect(content.status.isLoaded).toBe(false);
     });
 
     test('should analyze email content with WebLLM', async () => {
       const mockResponse = {
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              isPhishing: false,
-              confidenceScore: 0.95,
-              riskLevel: 'low'
-            })
-          }
-        }]
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                isPhishing: false,
+                confidenceScore: 0.95,
+                riskLevel: 'low',
+              }),
+            },
+          },
+        ],
       };
 
       const engine = await CreateMLCEngine();
@@ -245,7 +249,7 @@ describe('Email Analysis System', () => {
       const result = await content.analyzeEmail({
         subject: 'Test Subject',
         body: 'Test Body',
-        attachments: []
+        attachments: [],
       });
 
       expect(result.isPhishing).toBe(false);
@@ -262,10 +266,10 @@ describe('Email Analysis System', () => {
         contextAnalysis: { businessContext: 'Normal business email' },
         legitimatePatterns: { matches: ['Standard format'] },
         riskFactors: [],
-        finalAssessment: { 
+        finalAssessment: {
           summary: 'Safe email',
-          falsePositiveRisk: 0.1
-        }
+          falsePositiveRisk: 0.1,
+        },
       };
 
       document.body.innerHTML = '<div class="adn ads"></div>';
@@ -289,10 +293,10 @@ describe('Email Analysis System', () => {
         contextAnalysis: { businessContext: 'Suspicious email' },
         legitimatePatterns: { matches: [] },
         riskFactors: [{ category: 'Urgency', detail: 'High pressure tactics' }],
-        finalAssessment: { 
+        finalAssessment: {
           summary: 'Likely phishing attempt',
-          falsePositiveRisk: 0.1
-        }
+          falsePositiveRisk: 0.1,
+        },
       };
 
       content.createAnalysisUI(results, 'GMAIL');
@@ -311,7 +315,7 @@ describe('Email Analysis System', () => {
       Object.assign(content.status, {
         isLoaded: false,
         lastUpdated: null,
-        analyzing: 0
+        analyzing: 0,
       });
 
       // Set up message handler
@@ -343,4 +347,4 @@ describe('Email Analysis System', () => {
       expect(sendResponse).toHaveBeenCalled();
     });
   });
-}); 
+});

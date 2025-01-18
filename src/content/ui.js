@@ -9,7 +9,7 @@ export function createAnalysisUI(results, provider, PROVIDERS) {
   // Create main container
   const analysis = document.createElement('div');
   analysis.className = `security-analysis risk-${results.riskLevel}`;
-  
+
   // Create banner content
   analysis.innerHTML = `
     <div class="banner-wrapper">
@@ -29,12 +29,20 @@ export function createAnalysisUI(results, provider, PROVIDERS) {
     </div>
     <div class="details-panel">
       <div class="details-content">
-        ${results.finalAssessment?.summary ? `
+        ${
+          results.finalAssessment?.summary
+            ? `
           <p class="summary">${results.finalAssessment.summary}</p>
-        ` : ''}
-        ${results.riskFactors?.length > 0 ? `
+        `
+            : ''
+        }
+        ${
+          results.riskFactors?.length > 0
+            ? `
           <div class="risk-factors">
-            ${results.riskFactors.map(factor => `
+            ${results.riskFactors
+              .map(
+                (factor) => `
               <div class="factor">
                 <div class="factor-header">
                   <span class="factor-title">${factor.category}</span>
@@ -44,23 +52,27 @@ export function createAnalysisUI(results, provider, PROVIDERS) {
                 </div>
                 <p class="factor-detail">${factor.detail}</p>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     </div>
   `;
 
   // Find the best insertion point
   let insertionPoint = null;
-  
+
   // Try different possible selectors in order of preference
   const selectors = [
     '.ha', // Gmail header area
     '.hP', // Subject line
     '.aeF', // Email content wrapper
     '.adn.ads', // Email body container
-    '.gs' // General email section
+    '.gs', // General email section
   ];
 
   for (const selector of selectors) {
@@ -365,7 +377,7 @@ export function showLoadingState(provider, PROVIDERS) {
   // Use same insertion point finding logic
   let insertionPoint = null;
   const selectors = ['.ha', '.hP', '.aeF', '.adn.ads', '.gs'];
-  
+
   for (const selector of selectors) {
     const element = container.querySelector(selector);
     if (element) {
@@ -384,7 +396,7 @@ export function showLoadingState(provider, PROVIDERS) {
   }
 
   return analysis;
-} 
+}
 
 function getStatusIcon(riskLevel) {
   const icons = {
@@ -411,8 +423,8 @@ function getStatusIcon(riskLevel) {
         <circle class="spinner-track" cx="12" cy="12" r="10" stroke-width="2" fill="none"/>
         <circle class="spinner" cx="12" cy="12" r="10" stroke-width="2" fill="none"/>
       </svg>
-    `
+    `,
   };
 
   return icons[riskLevel] || icons.loading;
-} 
+}

@@ -2,7 +2,7 @@
 const createMockStatus = () => ({
   isLoaded: false,
   lastUpdated: null,
-  analyzing: 0
+  analyzing: 0,
 });
 
 // Mock WebLLM first
@@ -19,13 +19,18 @@ jest.mock('../../../src/content/content', () => {
     initializeEngine: mockInitializeEngine,
     analyzeEmail: mockAnalyzeEmail,
     status: mockStatus,
-    getMessageHandler: jest.fn(() => mockMessageHandler)
+    getMessageHandler: jest.fn(() => mockMessageHandler),
   };
 });
 
 // Imports after mocks
-import { CreateMLCEngine } from "@mlc-ai/web-llm";
-import { initializeEngine, analyzeEmail, status, getMessageHandler } from '../../../src/content/content';
+import { CreateMLCEngine } from '@mlc-ai/web-llm';
+import {
+  initializeEngine,
+  analyzeEmail,
+  status,
+  getMessageHandler,
+} from '../../../src/content/content';
 
 // Setup global mocks
 global.chrome = {
@@ -34,9 +39,9 @@ global.chrome = {
       addListener: jest.fn((listener) => {
         chrome.runtime.onMessage.callback = listener;
       }),
-      callback: null
-    }
-  }
+      callback: null,
+    },
+  },
 };
 
 describe('Content Script Core', () => {
@@ -91,9 +96,9 @@ describe('Content Script Core', () => {
       CreateMLCEngine.mockResolvedValue({
         chat: {
           completions: {
-            create: jest.fn()
-          }
-        }
+            create: jest.fn(),
+          },
+        },
       });
 
       await initializeEngine();
@@ -105,9 +110,9 @@ describe('Content Script Core', () => {
       CreateMLCEngine.mockResolvedValue({
         chat: {
           completions: {
-            create: jest.fn()
-          }
-        }
+            create: jest.fn(),
+          },
+        },
       });
 
       await initializeEngine();
@@ -117,7 +122,7 @@ describe('Content Script Core', () => {
 
     test('should handle initialization errors', async () => {
       CreateMLCEngine.mockRejectedValue(new Error('Init failed'));
-      
+
       await expect(initializeEngine()).rejects.toThrow('Init failed');
       expect(status.isLoaded).toBe(false);
     });
@@ -127,17 +132,20 @@ describe('Content Script Core', () => {
     beforeEach(() => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          choices: [{
-            message: {
-              content: JSON.stringify({
-                isPhishing: false,
-                confidenceScore: 0.95,
-                riskLevel: 'low'
-              })
-            }
-          }]
-        })
+        json: () =>
+          Promise.resolve({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    isPhishing: false,
+                    confidenceScore: 0.95,
+                    riskLevel: 'low',
+                  }),
+                },
+              },
+            ],
+          }),
       });
     });
 
@@ -145,7 +153,7 @@ describe('Content Script Core', () => {
       const emailData = {
         subject: 'Test Subject',
         body: 'Test Body',
-        attachments: []
+        attachments: [],
       };
 
       const result = await analyzeEmail(emailData);
@@ -160,7 +168,7 @@ describe('Content Script Core', () => {
       const emailData = {
         subject: 'Test Subject',
         body: 'Test Body',
-        attachments: []
+        attachments: [],
       };
 
       const result = await analyzeEmail(emailData);
@@ -196,4 +204,4 @@ describe('Content Script Core', () => {
       expect(status.lastUpdated).toBeNull();
     });
   });
-}); 
+});
