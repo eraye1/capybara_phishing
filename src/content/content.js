@@ -18,7 +18,7 @@ const AI_CONFIG = {
     model: 'gpt-4o',
     backupModel: 'gpt-4o-mini',
     maxRetries: 3,
-    timeout: 30000
+    timeout: 60000
   }
 };
 
@@ -29,7 +29,7 @@ async function initializeEngine() {
         try {
             console.log('About to create MLCEngine');
             engine = await CreateMLCEngine(
-            "Llama-3.1-8B-Instruct-q4f32_1-MLC",
+            "SmolLM2-360M-Instruct-q4f16_1-MLC",
             {
                 initProgressCallback: (progress) => {
                 console.log("Model loading progress:", JSON.stringify(progress));
@@ -192,7 +192,7 @@ async function analyzeEmail(emailData) {
           response_format: { type: "json_object" }
         }),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Chat completion timed out after 30s')), 30000)
+          setTimeout(() => reject(new Error('Chat completion timed out after 30s')), 60000)
         )
       ]);
     } else if (AI_CONFIG.provider === 'openai') {

@@ -4,7 +4,6 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    background: './background.js',
     content: './src/content/content.js',
     popup: './src/popup/popup.js',
     worker: './worker.js'
