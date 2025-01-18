@@ -1,12 +1,9 @@
 # Build output
 dist/
+
+# Test coverage
 coverage/
-coverage/**/*
-**/lcov-report/
-**/lcov.info
-**/coverage.json
-coverage/lcov-report/index.html
-coverage/lcov.info
+.nyc_output/
 
 # Dependencies
 node_modules/
@@ -55,7 +52,3 @@ model_cache/
 *.crx
 *.pem
 *.zip
-
-# Test coverage
-coverage/
-.nyc_output/
