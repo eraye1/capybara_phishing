@@ -29,6 +29,7 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
 ## 🔐 Configuration
 
 1. Copy the template configuration file:
+
    ```bash
    cp config.template.js config.js
    ```
@@ -38,7 +39,7 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
    export const CONFIG = {
      // For OpenAI API mode (default, recommended):
      OPENAI_API_KEY: 'your-api-key-here',
-     
+
      // To use local LLM mode instead:
      provider: 'webllm', // Change to 'openai' for API mode
      // Note: Local mode requires a GPU and has reduced accuracy
@@ -48,18 +49,21 @@ Capybara is a Chrome extension that leverages advanced AI to protect users from 
 > ⚠️ SECURITY NOTE: Never commit your `config.js` file or share your API keys. The file is listed in `.gitignore` to prevent accidental commits.
 
 For CI/CD pipelines, set the following secrets in your GitHub repository:
+
 - `OPENAI_API_KEY`: Your OpenAI API key (not needed if using local LLM mode)
 - `CODECOV_TOKEN`: Your Codecov token
 
 ## 🚀 Quick Start
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/capybara.git
    cd capybara
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -67,11 +71,13 @@ For CI/CD pipelines, set the following secrets in your GitHub repository:
 3. Set up configuration (see Configuration section above)
 
 4. Generate extension icons:
+
    ```bash
    ./create_icons.sh
    ```
 
 5. Build the extension:
+
    ```bash
    npm run build
    ```
@@ -144,6 +150,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Capybara is designed with privacy and security in mind:
 
 - Two operation modes:
+
   1. OpenAI API Mode (Default, Recommended):
      - Email content is sent to OpenAI's API for analysis
      - The following data is sent:
@@ -170,6 +177,7 @@ Capybara is designed with privacy and security in mind:
   - Results caching is temporary and in-memory only
 
 ### Data Flow
+
 1. When an email is opened, the extension extracts:
    - Subject line
    - Email body content
